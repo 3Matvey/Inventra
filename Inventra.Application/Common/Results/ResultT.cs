@@ -9,7 +9,7 @@ public sealed class Result<TValue> : Result
     private readonly TValue? _value;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ResultT{TValue}"/> class with a successful result and a value.
+    /// Initializes a new instance of the <see cref="Result{TValue}"/> class with a successful result and a value.
     /// </summary>
     /// <param name="value">The value.</param>
     private Result(
@@ -20,7 +20,7 @@ public sealed class Result<TValue> : Result
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ResultT{TValue}"/> class with a failed result and an error.
+    /// Initializes a new instance of the <see cref="Result{TValue}"/> class with a failed result and an error.
     /// </summary>
     /// <param name="error">The error.</param>
     private Result(
@@ -52,14 +52,14 @@ public sealed class Result<TValue> : Result
         new(value);
 
     /// <summary>
-    /// Creates a new <see cref="ResultT{TValue}"/> with a successful result and a value.
+    /// Creates a new <see cref="Result{TValue}"/> with a successful result and a value.
     /// </summary>
     /// <param name="value">The value.</param>
     public static Result<TValue> Success(TValue value) =>
         new(value);
 
     /// <summary>
-    /// Creates a new <see cref="ResultT{TValue}"/> with a failed result and an error.
+    /// Creates a new <see cref="Result{TValue}"/> with a failed result and an error.
     /// </summary>
     /// <param name="error">The error.</param>
     public static new Result<TValue> Failure(Error error) =>

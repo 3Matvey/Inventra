@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Inventra.Application.Common.Results;
@@ -22,6 +23,8 @@ public class Result
     /// <param name="error">The error associated with the failed result.</param>
     private protected Result(Error error)
     {
+        ArgumentNullException.ThrowIfNull(error);
+
         IsSuccess = false;
         Error = error;
     }
@@ -29,6 +32,7 @@ public class Result
     /// <summary>
     /// Gets a value indicating whether the result is successful.
     /// </summary>
+    [MemberNotNullWhen(false, nameof(Error))] 
     public bool IsSuccess { get; }
 
     /// <summary>

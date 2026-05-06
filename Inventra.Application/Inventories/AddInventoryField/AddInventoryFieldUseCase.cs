@@ -1,0 +1,52 @@
+using Inventra.Application.Common.Interfaces;
+using Inventra.Application.Common.Results;
+using Inventra.Domain.Entities;
+using Inventra.Domain.Exceptions;
+
+namespace Inventra.Application.Inventories.AddInventoryField;
+
+public sealed class AddInventoryFieldUseCase(
+    IInventoryRepository inventoryRepository,
+    IInventoryPermissionService permissionService,
+    IDateTimeProvider dateTimeProvider,
+    IUnitOfWork unitOfWork)
+{
+    public async Task<Result<Guid>> ExecuteAsync(
+        AddInventoryFieldRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+            inventoryRepository,
+            permissionService,
+            request.InventoryId,
+            cancellationToken);
+
+        return inventoryResult.IsSuccess
+            ? await AddFieldAsync(request, inventoryResult.Value, cancellationToken)
+            : inventoryResult.Error!;
+    }
+
+    private async Task<Result<Guid>> AddFieldAsync(
+        AddInventoryFieldRequest request,
+        Inventory inventory,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var field = inventory.AddField(
+                request.Type,
+                request.Title,
+                request.Description,
+                request.ShowInTable,
+                dateTimeProvider.UtcNow);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return field.Id;
+        }
+        catch (InventoryFieldLimitExceededException exception)
+        {
+            return InventoryErrors.FieldLimitExceeded(exception.Message);
+        }
+    }
+}
