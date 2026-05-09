@@ -38,4 +38,29 @@ public static class InventoryErrors
         Error.BadRequest(
             "Inventory.FieldLimitExceeded",
             description);
+
+    public static Error AccessUserNotFound(string userNameOrEmail) =>
+        Error.NotFound(
+            "Inventory.AccessUserNotFound",
+            $"User '{userNameOrEmail}' was not found.");
+
+    public static Error OwnerAccessGrantNotAllowed() =>
+        Error.BadRequest(
+            "Inventory.OwnerAccessGrantNotAllowed",
+            "Inventory owner does not need an explicit access grant.");
+
+    public static Error IdFormatElementNotFound(Guid elementId) =>
+        Error.NotFound(
+            "Inventory.IdFormatElementNotFound",
+            $"Inventory ID format element '{elementId}' was not found.");
+
+    public static Error InvalidIdFormat(string description) =>
+        Error.BadRequest(
+            "Inventory.InvalidIdFormat",
+            description);
+
+    public static Error InvalidIdElementOrder() =>
+        Error.BadRequest(
+            "Inventory.InvalidIdElementOrder",
+            "ID element order must contain every element exactly once.");
 }

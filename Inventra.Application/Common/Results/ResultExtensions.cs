@@ -17,7 +17,7 @@ public static class ResultExtensions
     {
         return result.IsSuccess
             ? onSuccess()
-            : onFailure(result.Error!);
+            : onFailure(result.Error);
     }
 
     /// <summary>
@@ -36,6 +36,6 @@ public static class ResultExtensions
     {
         return result.IsSuccess
             ? onSuccess(result.Value)
-            : onFailure(result.Error!);
+            : onFailure(result.Error);
     }
 }

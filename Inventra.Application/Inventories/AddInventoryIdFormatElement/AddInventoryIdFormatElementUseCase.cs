@@ -3,16 +3,16 @@ using Inventra.Application.Common.Results;
 using Inventra.Domain.Entities;
 using Inventra.Domain.Exceptions;
 
-namespace Inventra.Application.Inventories.AddInventoryField;
+namespace Inventra.Application.Inventories.AddInventoryIdFormatElement;
 
-public sealed class AddInventoryFieldUseCase(
+public sealed class AddInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<Guid>> ExecuteAsync(
-        AddInventoryFieldRequest request,
+        AddInventoryIdFormatElementRequest request,
         CancellationToken cancellationToken = default)
     {
         var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
@@ -22,31 +22,30 @@ public sealed class AddInventoryFieldUseCase(
             cancellationToken);
 
         return inventoryResult.IsSuccess
-            ? await AddFieldAsync(request, inventoryResult.Value, cancellationToken)
+            ? await AddElementAsync(request, inventoryResult.Value, cancellationToken)
             : inventoryResult.Error;
     }
 
-    private async Task<Result<Guid>> AddFieldAsync(
-        AddInventoryFieldRequest request,
+    private async Task<Result<Guid>> AddElementAsync(
+        AddInventoryIdFormatElementRequest request,
         Inventory inventory,
         CancellationToken cancellationToken)
     {
         try
         {
-            var field = inventory.AddField(
+            var element = inventory.AddIdFormatElement(
                 request.Type,
-                request.Title,
-                request.Description,
-                request.ShowInTable,
+                request.Value,
+                request.Format,
                 dateTimeProvider.UtcNow);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return field.Id;
+            return element.Id;
         }
-        catch (InventoryFieldLimitExceededException exception)
+        catch (InvalidInventoryIdFormatException exception)
         {
-            return InventoryErrors.FieldLimitExceeded(exception.Message);
+            return InventoryErrors.InvalidIdFormat(exception.Message);
         }
     }
 }
