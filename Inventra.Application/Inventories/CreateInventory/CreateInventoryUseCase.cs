@@ -4,42 +4,31 @@ using Inventra.Domain.Entities;
 
 namespace Inventra.Application.Inventories.CreateInventory;
 
-public sealed class CreateInventoryUseCase
+public sealed class CreateInventoryUseCase(
+    ICurrentUser currentUser,
+    IDateTimeProvider dateTimeProvider,
+    IInventoryRepository inventoryRepository,
+    ICategoryRepository categoryRepository,
+    ITagRepository tagRepository,
+    IUnitOfWork unitOfWork)
 {
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly ICurrentUser _currentUser;
-    private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IInventoryRepository _inventoryRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CreateInventoryUseCase(
-        ICurrentUser currentUser,
-        IDateTimeProvider dateTimeProvider,
-        IInventoryRepository inventoryRepository,
-        ICategoryRepository categoryRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _currentUser = currentUser;
-        _dateTimeProvider = dateTimeProvider;
-        _inventoryRepository = inventoryRepository;
-        _categoryRepository = categoryRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<Guid>> ExecuteAsync(
         CreateInventoryRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!_currentUser.IsAuthenticated || _currentUser.UserId is null)
+        if (!currentUser.IsAuthenticated || currentUser.UserId is null)
             return InventoryErrors.AuthenticationRequired();
 
-        if (!await _categoryRepository.ExistsAsync(request.CategoryId, cancellationToken))
+        if (!await categoryRepository.ExistsAsync(request.CategoryId, cancellationToken))
             return InventoryErrors.CategoryNotFound(request.CategoryId);
 
-        var inventory = CreateInventory(request, _currentUser.UserId.Value);
+        var inventory = CreateInventory(request, currentUser.UserId.Value);
+        var tags = await ResolveTagsAsync(request.Tags, cancellationToken);
 
-        await _inventoryRepository.AddAsync(inventory, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        inventory.ReplaceTags(tags.Select(x => x.Id), dateTimeProvider.UtcNow);
+
+        await inventoryRepository.AddAsync(inventory, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return inventory.Id;
     }
@@ -52,6 +41,41 @@ public sealed class CreateInventoryUseCase
             request.Title,
             request.DescriptionMarkdown,
             request.ImageUrl,
-            _dateTimeProvider.UtcNow);
+            dateTimeProvider.UtcNow);
+    }
+
+    private async Task<IReadOnlyCollection<Tag>> ResolveTagsAsync(
+        IReadOnlyCollection<string> tagNames,
+        CancellationToken cancellationToken)
+    {
+        var tags = new List<Tag>();
+
+        foreach (var tagName in NormalizeTags(tagNames))
+            tags.Add(await GetOrCreateTagAsync(tagName, cancellationToken));
+
+        return tags;
+    }
+
+    private async Task<Tag> GetOrCreateTagAsync(
+        string tagName,
+        CancellationToken cancellationToken)
+    {
+        var tag = await tagRepository.GetByNameAsync(tagName, cancellationToken);
+
+        if (tag is not null)
+            return tag;
+
+        tag = new Tag(tagName);
+        await tagRepository.AddAsync(tag, cancellationToken);
+
+        return tag;
+    }
+
+    private static string[] NormalizeTags(IEnumerable<string> tagNames)
+    {
+        return [.. tagNames
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
     }
 }
