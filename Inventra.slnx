@@ -2,4 +2,5 @@
   <Project Path="Inventra.Api/Inventra.Api.csproj" />
   <Project Path="Inventra.Application/Inventra.Application.csproj" />
   <Project Path="Inventra.Domain/Inventra.Domain.csproj" />
+  <Project Path="Inventra.Infrastructure.Data/Inventra.Infrastructure.Data.csproj" Id="29e399d8-a9b7-46c9-9b66-85ec56cbeae9" />
 </Solution>
