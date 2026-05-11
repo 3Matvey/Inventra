@@ -24,7 +24,9 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString));
+                options
+                    .UseNpgsql(connectionString)
+                    .UseSnakeCaseNamingConvention());
 
             return services;
         }
@@ -34,6 +36,7 @@ public static class DependencyInjection
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IInventoryRepository, InventoryRepository>();
             services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
+            services.AddScoped<IInventorySequenceProvider, InventorySequenceProvider>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 

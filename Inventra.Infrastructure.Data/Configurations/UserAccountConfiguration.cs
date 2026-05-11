@@ -8,7 +8,6 @@ internal class UserAccountConfiguration : IEntityTypeConfiguration<UserAccount>
 {
     public void Configure(EntityTypeBuilder<UserAccount> builder)
     {
-        builder.ToTable("user_accounts");
         builder.ConfigureId();
 
         builder.Property(x => x.UserName).HasMaxLength(128).IsRequired();

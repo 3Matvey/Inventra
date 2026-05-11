@@ -8,13 +8,16 @@ internal class InventoryItemConfiguration : IEntityTypeConfiguration<InventoryIt
 {
     public void Configure(EntityTypeBuilder<InventoryItem> builder)
     {
-        builder.ToTable("inventory_items");
         builder.ConfigureId();
 
         builder.Property(x => x.CustomId).HasMaxLength(256).IsRequired();
         builder.Property(x => x.Version).IsConcurrencyToken();
 
         builder.HasIndex(x => new { x.InventoryId, x.CustomId }).IsUnique();
+        builder.HasIndex(x => new { x.InventoryId, x.SequenceNumber })
+            .IsUnique()
+            .HasFilter("sequence_number IS NOT NULL");
+
         builder.HasMany(x => x.FieldValues).WithOne().HasForeignKey(x => x.ItemId);
         builder.HasMany(x => x.Likes).WithOne().HasForeignKey(x => x.ItemId);
 

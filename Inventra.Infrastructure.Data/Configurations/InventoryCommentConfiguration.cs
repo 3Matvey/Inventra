@@ -8,7 +8,6 @@ internal class InventoryCommentConfiguration : IEntityTypeConfiguration<Inventor
 {
     public void Configure(EntityTypeBuilder<InventoryComment> builder)
     {
-        builder.ToTable("inventory_comments");
         builder.ConfigureId();
 
         builder.Property(x => x.BodyMarkdown).HasColumnType("text").IsRequired();

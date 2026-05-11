@@ -8,7 +8,6 @@ internal class InventoryAccessGrantConfiguration : IEntityTypeConfiguration<Inve
 {
     public void Configure(EntityTypeBuilder<InventoryAccessGrant> builder)
     {
-        builder.ToTable("inventory_access_grants");
         builder.ConfigureId();
 
         builder.HasIndex(x => new { x.InventoryId, x.UserId }).IsUnique();

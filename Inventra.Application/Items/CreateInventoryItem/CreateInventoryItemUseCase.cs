@@ -1,5 +1,6 @@
 using Inventra.Application.Common.Interfaces;
 using Inventra.Application.Common.Results;
+using Inventra.Application.Inventories.CustomIds;
 using Inventra.Domain.Entities;
 using Inventra.Domain.Exceptions;
 
@@ -11,6 +12,7 @@ public sealed class CreateInventoryItemUseCase(
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
     ICustomIdGenerator customIdGenerator,
+    IInventorySequenceProvider sequenceProvider,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
@@ -55,18 +57,36 @@ public sealed class CreateInventoryItemUseCase(
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var customId = await customIdGenerator.GenerateAsync(inventory, cancellationToken);
+        var createdAt = dateTimeProvider.UtcNow;
+        var sequenceNumber = await GetSequenceNumberAsync(inventory, cancellationToken);
+        var customId = customIdGenerator.Generate(inventory, sequenceNumber, createdAt);
 
         if (string.IsNullOrWhiteSpace(customId))
             return ItemErrors.CustomIdFormatNotConfigured();
 
-        var item = new InventoryItem(inventory.Id, userId, customId, dateTimeProvider.UtcNow);
+        var item = new InventoryItem(inventory.Id, userId, customId, sequenceNumber, createdAt);
         var valuesResult = SetValues(request.FieldValues, inventory, item);
 
         if (!valuesResult.IsSuccess)
             return valuesResult.Error;
 
         return item;
+    }
+
+    private Task<long?> GetSequenceNumberAsync(
+        Inventory inventory,
+        CancellationToken cancellationToken)
+    {
+        return InventoryCustomIdComposer.RequiresSequence(inventory.IdFormatElements)
+            ? GetNextSequenceAsync(inventory.Id, cancellationToken)
+            : Task.FromResult<long?>(null);
+    }
+
+    private async Task<long?> GetNextSequenceAsync(
+        Guid inventoryId,
+        CancellationToken cancellationToken)
+    {
+        return await sequenceProvider.GetNextSequenceAsync(inventoryId, cancellationToken);
     }
 
     private Result SetValues(

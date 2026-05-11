@@ -8,7 +8,6 @@ internal class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
 {
     public void Configure(EntityTypeBuilder<Inventory> builder)
     {
-        builder.ToTable("inventories");
         builder.ConfigureId();
 
         builder.Property(x => x.Title).HasMaxLength(200).IsRequired();

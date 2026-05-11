@@ -8,7 +8,6 @@ internal class ItemFieldValueConfiguration : IEntityTypeConfiguration<ItemFieldV
 {
     public void Configure(EntityTypeBuilder<ItemFieldValue> builder)
     {
-        builder.ToTable("item_field_values");
         builder.ConfigureId();
 
         builder.Property(x => x.TextValue).HasColumnType("text");

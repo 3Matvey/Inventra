@@ -20,6 +20,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
+    public DbSet<InventorySequence> InventorySequences => Set<InventorySequence>();
+
     public DbSet<InventoryTag> InventoryTags => Set<InventoryTag>();
 
     public DbSet<ItemFieldValue> ItemFieldValues => Set<ItemFieldValue>();

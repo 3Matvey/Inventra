@@ -11,6 +11,7 @@ public sealed class InventoryItem : AuditableEntity
     public Guid InventoryId { get; private set; }
     public Guid CreatedById { get; private set; }
     public string CustomId { get; private set; } = string.Empty;
+    public long? SequenceNumber { get; private set; }
     public long Version { get; private set; }
 
     public IReadOnlyCollection<ItemFieldValue> FieldValues => _fieldValues.AsReadOnly();
@@ -20,11 +21,17 @@ public sealed class InventoryItem : AuditableEntity
     {
     }
 
-    public InventoryItem(Guid inventoryId, Guid createdById, string customId, DateTimeOffset createdAt)
+    public InventoryItem(
+        Guid inventoryId,
+        Guid createdById,
+        string customId,
+        long? sequenceNumber,
+        DateTimeOffset createdAt)
         : base(createdAt)
     {
         InventoryId = Guard.RequiredId(inventoryId);
         CreatedById = Guard.RequiredId(createdById);
+        SequenceNumber = sequenceNumber;
         ChangeCustomId(customId, createdAt);
     }
 

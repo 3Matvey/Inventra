@@ -4,5 +4,8 @@ namespace Inventra.Application.Common.Interfaces;
 
 public interface ICustomIdGenerator
 {
-    Task<string> GenerateAsync(Inventory inventory, CancellationToken cancellationToken = default);
+    string Generate(
+        Inventory inventory,
+        long? sequenceNumber,
+        DateTimeOffset createdAt);
 }

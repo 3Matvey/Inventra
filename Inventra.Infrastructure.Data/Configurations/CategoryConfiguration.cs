@@ -8,7 +8,6 @@ internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
     public void Configure(EntityTypeBuilder<Category> builder)
     {
-        builder.ToTable("categories");
         builder.ConfigureId();
 
         builder.Property(x => x.Name).HasMaxLength(128).IsRequired();

@@ -38,9 +38,14 @@ internal static class InventoryCustomIdComposer
             InventoryIdElementType.Random9DigitNumber => RandomDigits(element, context, 123456789, 1_000_000_000, "D9"),
             InventoryIdElementType.Guid => GuidValue(element, context),
             InventoryIdElementType.DateTime => DateTimeValue(element, context),
-            InventoryIdElementType.Sequence => Number(context.Sequence, element.Format),
+            InventoryIdElementType.Sequence => SequenceValue(element, context),
             _ => string.Empty
         };
+    }
+
+    public static bool RequiresSequence(IEnumerable<InventoryIdFormatElement> elements)
+    {
+        return elements.Any(x => x.Type == InventoryIdElementType.Sequence);
     }
 
     private static string Random20Bit(
@@ -95,6 +100,15 @@ internal static class InventoryCustomIdComposer
         return context.CreatedAt.ToString(
             element.Format ?? "yyyyMMddHHmmss",
             CultureInfo.InvariantCulture);
+    }
+
+    private static string SequenceValue(
+        InventoryIdFormatElement element,
+        CustomIdComposeContext context)
+    {
+        return context.Sequence.HasValue
+            ? Number(context.Sequence.Value, element.Format)
+            : string.Empty;
     }
 
     private static uint RandomUInt32()

@@ -8,7 +8,6 @@ internal class InventoryIdFormatElementConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<InventoryIdFormatElement> builder)
     {
-        builder.ToTable("inventory_id_format_elements");
         builder.ConfigureId();
 
         builder.Property(x => x.Value).HasMaxLength(256);

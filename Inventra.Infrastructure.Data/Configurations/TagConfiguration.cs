@@ -8,7 +8,6 @@ internal class TagConfiguration : IEntityTypeConfiguration<Tag>
 {
     public void Configure(EntityTypeBuilder<Tag> builder)
     {
-        builder.ToTable("tags");
         builder.ConfigureId();
 
         builder.Property(x => x.Name).HasMaxLength(64).IsRequired();

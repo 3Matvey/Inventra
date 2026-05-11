@@ -3,16 +3,14 @@ using Inventra.Domain.Entities;
 
 namespace Inventra.Application.Inventories.CustomIds;
 
-public sealed class InventoryCustomIdGenerator(
-    IDateTimeProvider dateTimeProvider,
-    IInventorySequenceProvider sequenceProvider) : ICustomIdGenerator
+public sealed class InventoryCustomIdGenerator : ICustomIdGenerator
 {
-    public async Task<string> GenerateAsync(
+    public string Generate(
         Inventory inventory,
-        CancellationToken cancellationToken = default)
+        long? sequenceNumber,
+        DateTimeOffset createdAt)
     {
-        var sequence = await sequenceProvider.GetNextSequenceAsync(inventory.Id, cancellationToken);
-        var context = new CustomIdComposeContext(dateTimeProvider.UtcNow, sequence, UseSampleValues: false);
+        var context = new CustomIdComposeContext(createdAt, sequenceNumber, UseSampleValues: false);
 
         return InventoryCustomIdComposer.Compose(inventory.IdFormatElements, context);
     }
