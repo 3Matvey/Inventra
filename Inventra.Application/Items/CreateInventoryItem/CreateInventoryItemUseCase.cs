@@ -13,7 +13,7 @@ public sealed class CreateInventoryItemUseCase(
     IInventoryPermissionService permissionService,
     ICustomIdGenerator customIdGenerator,
     IInventorySequenceProvider sequenceProvider,
-    IDateTimeProvider dateTimeProvider,
+    TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<Guid>> ExecuteAsync(
@@ -57,14 +57,14 @@ public sealed class CreateInventoryItemUseCase(
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var createdAt = dateTimeProvider.UtcNow;
+        var createdAt = timeProvider.GetUtcNow();
         var sequenceNumber = await GetSequenceNumberAsync(inventory, cancellationToken);
         var customId = customIdGenerator.Generate(inventory, sequenceNumber, createdAt);
 
         if (string.IsNullOrWhiteSpace(customId))
             return ItemErrors.CustomIdFormatNotConfigured();
 
-        var item = new InventoryItem(inventory.Id, userId, customId, sequenceNumber, createdAt);
+        var item = new InventoryItem(inventory.Id, userId, customId, sequenceNumber);
         var valuesResult = SetValues(request.FieldValues, inventory, item);
 
         if (!valuesResult.IsSuccess)
@@ -127,7 +127,7 @@ public sealed class CreateInventoryItemUseCase(
         if (!valueResult.IsSuccess)
             return valueResult.Error;
 
-        item.SetFieldValue(field, valueResult.Value, dateTimeProvider.UtcNow);
+        item.SetFieldValue(field, valueResult.Value);
 
         return Result.Success();
     }

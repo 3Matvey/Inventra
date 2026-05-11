@@ -8,7 +8,6 @@ namespace Inventra.Application.Inventories.UpdateInventoryIdFormatElement;
 public sealed class UpdateInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -47,8 +46,7 @@ public sealed class UpdateInventoryIdFormatElementUseCase(
             inventory.UpdateIdFormatElement(
                 request.ElementId,
                 request.Value,
-                request.Format,
-                dateTimeProvider.UtcNow);
+                request.Format);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

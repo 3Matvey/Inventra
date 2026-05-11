@@ -8,7 +8,7 @@ public sealed class GrantInventoryAccessUseCase(
     IInventoryRepository inventoryRepository,
     IUserRepository userRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
+    TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<Guid>> ExecuteAsync(
@@ -47,7 +47,7 @@ public sealed class GrantInventoryAccessUseCase(
         if (userId == inventory.OwnerId)
             return InventoryErrors.OwnerAccessGrantNotAllowed();
 
-        var grant = inventory.GrantAccess(userId, dateTimeProvider.UtcNow);
+        var grant = inventory.GrantAccess(userId, timeProvider.GetUtcNow());
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return grant.Id;

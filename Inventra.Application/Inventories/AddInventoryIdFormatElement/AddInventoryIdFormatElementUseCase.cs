@@ -8,7 +8,6 @@ namespace Inventra.Application.Inventories.AddInventoryIdFormatElement;
 public sealed class AddInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<Guid>> ExecuteAsync(
@@ -36,8 +35,7 @@ public sealed class AddInventoryIdFormatElementUseCase(
             var element = inventory.AddIdFormatElement(
                 request.Type,
                 request.Value,
-                request.Format,
-                dateTimeProvider.UtcNow);
+                request.Format);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -23,10 +23,12 @@ public static class DependencyInjection
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<AppDbContext>(options =>
+            services.AddScoped<AuditInterceptor>();
+            services.AddDbContext<AppDbContext>((provider, options) =>
                 options
                     .UseNpgsql(connectionString)
-                    .UseSnakeCaseNamingConvention());
+                    .UseSnakeCaseNamingConvention()
+                    .AddInterceptors(provider.GetRequiredService<AuditInterceptor>()));
 
             return services;
         }

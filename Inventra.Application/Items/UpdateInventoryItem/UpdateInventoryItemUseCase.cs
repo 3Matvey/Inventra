@@ -9,7 +9,6 @@ public sealed class UpdateInventoryItemUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -55,7 +54,7 @@ public sealed class UpdateInventoryItemUseCase(
     {
         try
         {
-            item.ChangeCustomId(request.CustomId, dateTimeProvider.UtcNow);
+            item.ChangeCustomId(request.CustomId);
 
             foreach (var value in request.FieldValues)
             {
@@ -88,7 +87,7 @@ public sealed class UpdateInventoryItemUseCase(
         if (!valueResult.IsSuccess)
             return valueResult.Error;
 
-        item.SetFieldValue(field, valueResult.Value, dateTimeProvider.UtcNow);
+        item.SetFieldValue(field, valueResult.Value);
 
         return Result.Success();
     }

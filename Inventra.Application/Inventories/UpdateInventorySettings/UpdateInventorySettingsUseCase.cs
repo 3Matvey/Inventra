@@ -8,7 +8,6 @@ public sealed class UpdateInventorySettingsUseCase(
     IInventoryRepository inventoryRepository,
     ICategoryRepository categoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -38,8 +37,7 @@ public sealed class UpdateInventorySettingsUseCase(
             request.Title,
             request.DescriptionMarkdown,
             request.CategoryId,
-            request.ImageUrl,
-            dateTimeProvider.UtcNow);
+            request.ImageUrl);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

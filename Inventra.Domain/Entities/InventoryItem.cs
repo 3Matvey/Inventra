@@ -25,23 +25,21 @@ public sealed class InventoryItem : AuditableEntity
         Guid inventoryId,
         Guid createdById,
         string customId,
-        long? sequenceNumber,
-        DateTimeOffset createdAt)
-        : base(createdAt)
+        long? sequenceNumber)
     {
         InventoryId = Guard.RequiredId(inventoryId);
         CreatedById = Guard.RequiredId(createdById);
         SequenceNumber = sequenceNumber;
-        ChangeCustomId(customId, createdAt);
+        ChangeCustomId(customId);
     }
 
-    public void ChangeCustomId(string customId, DateTimeOffset changedAt)
+    public void ChangeCustomId(string customId)
     {
         CustomId = Guard.Required(customId);
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void SetFieldValue(InventoryField field, FieldValue value, DateTimeOffset changedAt)
+    public void SetFieldValue(InventoryField field, FieldValue value)
     {
         field = Guard.Required(field);
         value = Guard.Required(value);
@@ -62,7 +60,7 @@ public sealed class InventoryItem : AuditableEntity
             existingValue.SetValue(field.Type, value);
         }
 
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
     public void Like(Guid userId, DateTimeOffset createdAt)
@@ -89,9 +87,5 @@ public sealed class InventoryItem : AuditableEntity
         }
     }
 
-    private void MarkChanged(DateTimeOffset changedAt)
-    {
-        Version++;
-        Touch(changedAt);
-    }
+    private void MarkChanged() => Version++;
 }

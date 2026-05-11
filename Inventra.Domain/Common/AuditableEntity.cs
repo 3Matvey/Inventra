@@ -8,14 +8,4 @@ public abstract class AuditableEntity : Entity
     protected AuditableEntity()
     {
     }
-
-    protected AuditableEntity(DateTimeOffset createdAt)
-    {
-        CreatedAt = createdAt;
-    }
-
-    protected void Touch(DateTimeOffset changedAt)
-    {
-        UpdatedAt = changedAt;
-    }
 }

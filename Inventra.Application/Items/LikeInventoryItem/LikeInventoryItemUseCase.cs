@@ -7,7 +7,7 @@ public sealed class LikeInventoryItemUseCase(
     ICurrentUser currentUser,
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
+    TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -22,7 +22,7 @@ public sealed class LikeInventoryItemUseCase(
         if (item is null)
             return ItemErrors.NotFound(request.ItemId);
 
-        item.Like(currentUser.UserId.Value, dateTimeProvider.UtcNow);
+        item.Like(currentUser.UserId.Value, timeProvider.GetUtcNow());
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

@@ -8,7 +8,6 @@ namespace Inventra.Application.Inventories.AddInventoryField;
 public sealed class AddInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<Guid>> ExecuteAsync(
@@ -37,8 +36,7 @@ public sealed class AddInventoryFieldUseCase(
                 request.Type,
                 request.Title,
                 request.Description,
-                request.ShowInTable,
-                dateTimeProvider.UtcNow);
+                request.ShowInTable);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

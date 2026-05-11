@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.RemoveInventoryIdFormatElement;
 public sealed class RemoveInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -33,7 +32,7 @@ public sealed class RemoveInventoryIdFormatElementUseCase(
         if (inventory.IdFormatElements.All(x => x.Id != request.ElementId))
             return InventoryErrors.IdFormatElementNotFound(request.ElementId);
 
-        inventory.RemoveIdFormatElement(request.ElementId, dateTimeProvider.UtcNow);
+        inventory.RemoveIdFormatElement(request.ElementId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

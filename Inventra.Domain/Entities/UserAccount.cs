@@ -13,8 +13,7 @@ public sealed class UserAccount : AuditableEntity
     {
     }
 
-    public UserAccount(string userName, string email, DateTimeOffset createdAt)
-        : base(createdAt)
+    public UserAccount(string userName, string email)
     {
         Rename(userName);
         ChangeEmail(email);

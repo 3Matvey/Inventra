@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.UpdateInventoryField;
 public sealed class UpdateInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -37,8 +36,7 @@ public sealed class UpdateInventoryFieldUseCase(
             request.FieldId,
             request.Title,
             request.Description,
-            request.ShowInTable,
-            dateTimeProvider.UtcNow);
+            request.ShowInTable);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -8,7 +8,7 @@ namespace Inventra.Application.Inventories.PreviewInventoryCustomId;
 public sealed class PreviewInventoryCustomIdUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider)
+    TimeProvider timeProvider)
 {
     public async Task<Result<string>> ExecuteAsync(
         PreviewInventoryCustomIdRequest request,
@@ -27,7 +27,7 @@ public sealed class PreviewInventoryCustomIdUseCase(
 
     private string Preview(Inventory inventory)
     {
-        var context = InventoryCustomIdComposer.PreviewContext(dateTimeProvider.UtcNow);
+        var context = InventoryCustomIdComposer.PreviewContext(timeProvider.GetUtcNow());
 
         return InventoryCustomIdComposer.Compose(inventory.IdFormatElements, context);
     }

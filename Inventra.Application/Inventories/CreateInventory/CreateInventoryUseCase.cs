@@ -6,7 +6,6 @@ namespace Inventra.Application.Inventories.CreateInventory;
 
 public sealed class CreateInventoryUseCase(
     ICurrentUser currentUser,
-    IDateTimeProvider dateTimeProvider,
     IInventoryRepository inventoryRepository,
     ICategoryRepository categoryRepository,
     ITagRepository tagRepository,
@@ -25,7 +24,7 @@ public sealed class CreateInventoryUseCase(
         var inventory = CreateInventory(request, currentUser.UserId.Value);
         var tags = await ResolveTagsAsync(request.Tags, cancellationToken);
 
-        inventory.ReplaceTags(tags.Select(x => x.Id), dateTimeProvider.UtcNow);
+        inventory.ReplaceTags(tags.Select(x => x.Id));
 
         await inventoryRepository.AddAsync(inventory, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -40,8 +39,7 @@ public sealed class CreateInventoryUseCase(
             request.CategoryId,
             request.Title,
             request.DescriptionMarkdown,
-            request.ImageUrl,
-            dateTimeProvider.UtcNow);
+            request.ImageUrl);
     }
 
     private async Task<IReadOnlyCollection<Tag>> ResolveTagsAsync(

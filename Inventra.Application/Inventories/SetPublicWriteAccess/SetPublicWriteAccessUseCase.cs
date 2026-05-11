@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.SetPublicWriteAccess;
 public sealed class SetPublicWriteAccessUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -30,7 +29,7 @@ public sealed class SetPublicWriteAccessUseCase(
         Inventory inventory,
         CancellationToken cancellationToken)
     {
-        inventory.SetPublicWriteAccess(request.IsPublic, dateTimeProvider.UtcNow);
+        inventory.SetPublicWriteAccess(request.IsPublic);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

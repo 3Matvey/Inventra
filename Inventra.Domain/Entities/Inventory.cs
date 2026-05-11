@@ -38,29 +38,26 @@ public sealed class Inventory : AuditableEntity
         Guid categoryId,
         string title,
         string? descriptionMarkdown,
-        string? imageUrl,
-        DateTimeOffset createdAt)
-        : base(createdAt)
+        string? imageUrl)
     {
         OwnerId = Guard.RequiredId(ownerId);
         CategoryId = Guard.RequiredId(categoryId);
-        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, createdAt, incrementVersion: false);
+        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, incrementVersion: false);
     }
 
     public void UpdateSettings(
         string title,
         string? descriptionMarkdown,
         Guid categoryId,
-        string? imageUrl,
-        DateTimeOffset changedAt)
+        string? imageUrl)
     {
-        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, changedAt, incrementVersion: true);
+        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, incrementVersion: true);
     }
 
-    public void SetPublicWriteAccess(bool isPublic, DateTimeOffset changedAt)
+    public void SetPublicWriteAccess(bool isPublic)
     {
         IsPublicWriteAccess = isPublic;
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
     public InventoryAccessGrant GrantAccess(Guid userId, DateTimeOffset grantedAt)
@@ -79,12 +76,12 @@ public sealed class Inventory : AuditableEntity
 
         var grant = new InventoryAccessGrant(Id, userId, grantedAt);
         _accessGrants.Add(grant);
-        MarkChanged(grantedAt);
+        MarkChanged();
 
         return grant;
     }
 
-    public void RevokeAccess(Guid userId, DateTimeOffset changedAt)
+    public void RevokeAccess(Guid userId)
     {
         userId = Guard.RequiredId(userId);
 
@@ -94,7 +91,7 @@ public sealed class Inventory : AuditableEntity
             return;
 
         _accessGrants.Remove(grant);
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
     public bool HasExplicitWriteAccess(Guid userId)
@@ -108,8 +105,7 @@ public sealed class Inventory : AuditableEntity
         InventoryFieldType type,
         string title,
         string? description,
-        bool showInTable,
-        DateTimeOffset changedAt)
+        bool showInTable)
     {
         EnsureFieldLimit(type);
 
@@ -122,31 +118,31 @@ public sealed class Inventory : AuditableEntity
             NextFieldOrder());
 
         _fields.Add(field);
-        MarkChanged(changedAt);
+        MarkChanged();
 
         return field;
     }
 
-    public void UpdateField(Guid fieldId, string title, string? description, bool showInTable, DateTimeOffset changedAt)
+    public void UpdateField(Guid fieldId, string title, string? description, bool showInTable)
     {
         fieldId = Guard.RequiredId(fieldId);
 
         var field = GetField(fieldId);
         field.Update(title, description, showInTable);
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void RemoveField(Guid fieldId, DateTimeOffset changedAt)
+    public void RemoveField(Guid fieldId)
     {
         fieldId = Guard.RequiredId(fieldId);
 
         var field = GetField(fieldId);
         _fields.Remove(field);
         NormalizeFieldOrder();
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void ReorderFields(IReadOnlyList<Guid> orderedFieldIds, DateTimeOffset changedAt)
+    public void ReorderFields(IReadOnlyList<Guid> orderedFieldIds)
     {
         orderedFieldIds = Guard.RequiredCompleteIdSet(orderedFieldIds, _fields.Count);
 
@@ -155,14 +151,13 @@ public sealed class Inventory : AuditableEntity
             GetField(orderedFieldIds[i]).MoveTo(i);
         }
 
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
     public InventoryIdFormatElement AddIdFormatElement(
         InventoryIdElementType type,
         string? value,
-        string? format,
-        DateTimeOffset changedAt)
+        string? format)
     {
         if (_idFormatElements.Count >= RecommendedMaxIdElements)
         {
@@ -178,31 +173,31 @@ public sealed class Inventory : AuditableEntity
             NextIdElementOrder());
 
         _idFormatElements.Add(element);
-        MarkChanged(changedAt);
+        MarkChanged();
 
         return element;
     }
 
-    public void UpdateIdFormatElement(Guid elementId, string? value, string? format, DateTimeOffset changedAt)
+    public void UpdateIdFormatElement(Guid elementId, string? value, string? format)
     {
         elementId = Guard.RequiredId(elementId);
 
         var element = GetIdFormatElement(elementId);
         element.Update(value, format);
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void RemoveIdFormatElement(Guid elementId, DateTimeOffset changedAt)
+    public void RemoveIdFormatElement(Guid elementId)
     {
         elementId = Guard.RequiredId(elementId);
 
         var element = GetIdFormatElement(elementId);
         _idFormatElements.Remove(element);
         NormalizeIdElementOrder();
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void ReorderIdFormatElements(IReadOnlyList<Guid> orderedElementIds, DateTimeOffset changedAt)
+    public void ReorderIdFormatElements(IReadOnlyList<Guid> orderedElementIds)
     {
         orderedElementIds = Guard.RequiredCompleteIdSet(orderedElementIds, _idFormatElements.Count);
 
@@ -211,17 +206,17 @@ public sealed class Inventory : AuditableEntity
             GetIdFormatElement(orderedElementIds[i]).MoveTo(i);
         }
 
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
-    public void ReplaceTags(IEnumerable<Guid> tagIds, DateTimeOffset changedAt)
+    public void ReplaceTags(IEnumerable<Guid> tagIds)
     {
         var distinctTagIds = Guard.RequiredIds(tagIds);
 
         _tags.Clear();
         _tags.AddRange(distinctTagIds.Select(tagId => new InventoryTag(Id, tagId)));
 
-        MarkChanged(changedAt);
+        MarkChanged();
     }
 
     public InventoryComment AddComment(Guid authorId, string bodyMarkdown, DateTimeOffset createdAt)
@@ -239,7 +234,6 @@ public sealed class Inventory : AuditableEntity
         string? descriptionMarkdown,
         Guid categoryId,
         string? imageUrl,
-        DateTimeOffset changedAt,
         bool incrementVersion)
     {
         Title = Guard.Required(title);
@@ -249,7 +243,7 @@ public sealed class Inventory : AuditableEntity
 
         if (incrementVersion)
         {
-            MarkChanged(changedAt);
+            MarkChanged();
         }
     }
 
@@ -297,9 +291,5 @@ public sealed class Inventory : AuditableEntity
         }
     }
 
-    private void MarkChanged(DateTimeOffset changedAt)
-    {
-        Version++;
-        Touch(changedAt);
-    }
+    private void MarkChanged() => Version++;
 }

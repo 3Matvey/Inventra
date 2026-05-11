@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.RemoveInventoryField;
 public sealed class RemoveInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -33,7 +32,7 @@ public sealed class RemoveInventoryFieldUseCase(
         if (inventory.Fields.All(x => x.Id != request.FieldId))
             return InventoryErrors.FieldNotFound(request.FieldId);
 
-        inventory.RemoveField(request.FieldId, dateTimeProvider.UtcNow);
+        inventory.RemoveField(request.FieldId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

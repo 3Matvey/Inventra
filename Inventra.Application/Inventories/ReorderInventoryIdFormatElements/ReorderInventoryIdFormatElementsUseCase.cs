@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.ReorderInventoryIdFormatElements;
 public sealed class ReorderInventoryIdFormatElementsUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -33,7 +32,7 @@ public sealed class ReorderInventoryIdFormatElementsUseCase(
         if (!ContainsEveryElementOnce(inventory, request.OrderedElementIds))
             return InventoryErrors.InvalidIdElementOrder();
 
-        inventory.ReorderIdFormatElements(request.OrderedElementIds, dateTimeProvider.UtcNow);
+        inventory.ReorderIdFormatElements(request.OrderedElementIds);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

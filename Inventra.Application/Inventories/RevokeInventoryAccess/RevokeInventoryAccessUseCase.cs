@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.RevokeInventoryAccess;
 public sealed class RevokeInventoryAccessUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -30,7 +29,7 @@ public sealed class RevokeInventoryAccessUseCase(
         Inventory inventory,
         CancellationToken cancellationToken)
     {
-        inventory.RevokeAccess(request.UserId, dateTimeProvider.UtcNow);
+        inventory.RevokeAccess(request.UserId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

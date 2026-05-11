@@ -7,7 +7,6 @@ namespace Inventra.Application.Inventories.ReorderInventoryFields;
 public sealed class ReorderInventoryFieldsUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
-    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result> ExecuteAsync(
@@ -33,7 +32,7 @@ public sealed class ReorderInventoryFieldsUseCase(
         if (!ContainsEveryFieldOnce(inventory, request.OrderedFieldIds))
             return InventoryErrors.InvalidFieldOrder();
 
-        inventory.ReorderFields(request.OrderedFieldIds, dateTimeProvider.UtcNow);
+        inventory.ReorderFields(request.OrderedFieldIds);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
