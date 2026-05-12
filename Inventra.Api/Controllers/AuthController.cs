@@ -26,7 +26,7 @@ public class AuthController : ApiControllerBase
     {
         var result = await useCase.ExecuteAsync(cancellationToken);
 
-        return result.IsSuccess ? LocalRedirect(returnUrl) : ToActionResult(result);
+        return result.IsSuccess ? LocalRedirect(returnUrl) : FromResult(result);
     }
 
     [HttpPost("logout")]
@@ -44,6 +44,6 @@ public class AuthController : ApiControllerBase
     {
         var result = await useCase.ExecuteAsync(cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 }

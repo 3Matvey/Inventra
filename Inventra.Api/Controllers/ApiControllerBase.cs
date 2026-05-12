@@ -6,21 +6,21 @@ namespace Inventra.Api.Controllers;
 [ApiController]
 public abstract class ApiControllerBase : ControllerBase
 {
-    protected IActionResult ToActionResult(Result result)
+    protected IActionResult FromResult(Result result)
     {
         return result.IsSuccess
             ? NoContent()
-            : ToErrorResult(result.Error);
+            : FromError(result.Error);
     }
 
-    protected IActionResult ToActionResult<TValue>(Result<TValue> result)
+    protected IActionResult FromResult<TValue>(Result<TValue> result)
     {
         return result.IsSuccess
             ? Ok(result.Value)
-            : ToErrorResult(result.Error);
+            : FromError(result.Error);
     }
 
-    private IActionResult ToErrorResult(Error? error)
+    private IActionResult FromError(Error? error)
     {
         if (error is null)
             return Problem();

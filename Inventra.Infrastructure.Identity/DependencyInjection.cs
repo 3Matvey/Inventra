@@ -50,7 +50,7 @@ public static class DependencyInjection
 
         private IServiceCollection AddExternalAuthentication(IConfiguration configuration)
         {
-            var builder = services.ConfigureApplicationCookie()
+            services.ConfigureApplicationCookie()
                 .AddGoogleIfConfigured(configuration)
                 .AddFacebookIfConfigured(configuration);
 

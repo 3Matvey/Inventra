@@ -22,7 +22,7 @@ public class AdminUsersController : ApiControllerBase
             new GetUsersPageRequest(page, pageSize),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 
     [HttpPost("{userId:guid}/block")]
@@ -35,7 +35,7 @@ public class AdminUsersController : ApiControllerBase
             new ChangeUserBlockStatusRequest(userId, IsBlocked: true),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 
     [HttpPost("{userId:guid}/unblock")]
@@ -48,7 +48,7 @@ public class AdminUsersController : ApiControllerBase
             new ChangeUserBlockStatusRequest(userId, IsBlocked: false),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 
     [HttpPost("{userId:guid}/admin-role")]
@@ -61,7 +61,7 @@ public class AdminUsersController : ApiControllerBase
             new ChangeUserAdminRoleRequest(userId, IsAdmin: true),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 
     [HttpDelete("{userId:guid}/admin-role")]
@@ -74,7 +74,7 @@ public class AdminUsersController : ApiControllerBase
             new ChangeUserAdminRoleRequest(userId, IsAdmin: false),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 
     [HttpDelete("{userId:guid}")]
@@ -87,6 +87,6 @@ public class AdminUsersController : ApiControllerBase
             new DeleteUserRequest(userId),
             cancellationToken);
 
-        return ToActionResult(result);
+        return FromResult(result);
     }
 }
