@@ -1,14 +1,12 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
+using Inventra.Application.Inventories;
 using Inventra.Domain.Exceptions;
 
 namespace Inventra.Application.Items.UpdateInventoryItem;
 
 public sealed class UpdateInventoryItemUseCase(
+    ICurrentUser currentUser,
     IInventoryRepository inventoryRepository,
     IInventoryItemRepository itemRepository,
-    IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -35,7 +33,7 @@ public sealed class UpdateInventoryItemUseCase(
         InventoryItem item,
         CancellationToken cancellationToken)
     {
-        if (!permissionService.CanWriteItems(inventory))
+        if (!InventoryPermissions.CanWriteItems(currentUser, inventory))
             return ItemErrors.AccessDenied();
 
         var result = UpdateValues(request, inventory, item);

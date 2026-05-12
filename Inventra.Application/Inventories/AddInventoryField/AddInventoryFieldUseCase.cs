@@ -1,13 +1,10 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
 using Inventra.Domain.Exceptions;
 
 namespace Inventra.Application.Inventories.AddInventoryField;
 
 public sealed class AddInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -15,9 +12,9 @@ public sealed class AddInventoryFieldUseCase(
         AddInventoryFieldRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

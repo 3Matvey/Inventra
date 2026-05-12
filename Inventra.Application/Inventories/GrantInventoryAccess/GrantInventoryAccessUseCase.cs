@@ -1,13 +1,9 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Inventories.GrantInventoryAccess;
 
 public sealed class GrantInventoryAccessUseCase(
     IInventoryRepository inventoryRepository,
     IUserRepository userRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
     : IUseCase
@@ -16,9 +12,9 @@ public sealed class GrantInventoryAccessUseCase(
         GrantInventoryAccessRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

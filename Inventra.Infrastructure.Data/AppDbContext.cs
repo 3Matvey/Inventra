@@ -1,7 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-
 namespace Inventra.Infrastructure.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IUnitOfWork

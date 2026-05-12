@@ -1,5 +1,3 @@
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
 using Inventra.Domain.Enums;
 using Inventra.Domain.ValueObjects;
 

@@ -1,6 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-
 namespace Inventra.Application.Identity.Admin.ChangeUserBlockStatus;
 
 public sealed class ChangeUserBlockStatusUseCase(

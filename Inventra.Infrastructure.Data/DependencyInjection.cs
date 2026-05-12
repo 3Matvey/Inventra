@@ -1,6 +1,4 @@
-using Inventra.Application.Common.Interfaces;
 using Inventra.Infrastructure.Data.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

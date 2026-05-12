@@ -1,7 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Identity.CompleteExternalLogin;
 
 public sealed class CompleteExternalLoginUseCase(

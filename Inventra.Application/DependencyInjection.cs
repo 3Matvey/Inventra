@@ -1,4 +1,3 @@
-using Inventra.Application.Common.Interfaces;
 using Inventra.Application.Inventories.CustomIds;
 using Microsoft.Extensions.DependencyInjection;
 

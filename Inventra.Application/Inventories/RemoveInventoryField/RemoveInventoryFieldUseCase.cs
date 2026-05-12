@@ -1,12 +1,8 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Inventories.RemoveInventoryField;
 
 public sealed class RemoveInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -14,9 +10,9 @@ public sealed class RemoveInventoryFieldUseCase(
         RemoveInventoryFieldRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

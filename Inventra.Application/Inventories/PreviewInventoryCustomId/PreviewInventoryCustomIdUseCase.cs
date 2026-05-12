@@ -1,13 +1,10 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
 using Inventra.Application.Inventories.CustomIds;
-using Inventra.Domain.Entities;
 
 namespace Inventra.Application.Inventories.PreviewInventoryCustomId;
 
 public sealed class PreviewInventoryCustomIdUseCase(
     IInventoryRepository inventoryRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     TimeProvider timeProvider)
     : IUseCase
 {
@@ -15,9 +12,9 @@ public sealed class PreviewInventoryCustomIdUseCase(
         PreviewInventoryCustomIdRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

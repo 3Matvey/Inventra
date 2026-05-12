@@ -1,12 +1,8 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Inventories.RemoveInventoryIdFormatElement;
 
 public sealed class RemoveInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -14,9 +10,9 @@ public sealed class RemoveInventoryIdFormatElementUseCase(
         RemoveInventoryIdFormatElementRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

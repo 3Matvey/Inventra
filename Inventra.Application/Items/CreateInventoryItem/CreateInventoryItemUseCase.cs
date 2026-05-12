@@ -1,7 +1,5 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
+using Inventra.Application.Inventories;
 using Inventra.Application.Inventories.CustomIds;
-using Inventra.Domain.Entities;
 using Inventra.Domain.Exceptions;
 
 namespace Inventra.Application.Items.CreateInventoryItem;
@@ -10,7 +8,6 @@ public sealed class CreateInventoryItemUseCase(
     ICurrentUser currentUser,
     IInventoryRepository inventoryRepository,
     IInventoryItemRepository itemRepository,
-    IInventoryPermissionService permissionService,
     ICustomIdGenerator customIdGenerator,
     IInventorySequenceProvider sequenceProvider,
     TimeProvider timeProvider,
@@ -38,7 +35,7 @@ public sealed class CreateInventoryItemUseCase(
         Guid userId,
         CancellationToken cancellationToken)
     {
-        if (!permissionService.CanWriteItems(inventory))
+        if (!InventoryPermissions.CanWriteItems(currentUser, inventory))
             return ItemErrors.AccessDenied();
 
         var itemResult = await CreateItemAsync(request, inventory, userId, cancellationToken);

@@ -1,6 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
-
 namespace Inventra.Infrastructure.Data.Repositories;
 
 public class InventorySequenceProvider(AppDbContext dbContext) : IInventorySequenceProvider

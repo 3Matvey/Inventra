@@ -1,14 +1,10 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Inventories;
 
-internal static class InventoryAccessLoader
+internal static class InventoryAccess
 {
-    public static async Task<Result<Inventory>> LoadManageableAsync(
+    public static async Task<Result<Inventory>> LoadWithManageAccessAsync(
         IInventoryRepository inventoryRepository,
-        IInventoryPermissionService permissionService,
+        ICurrentUser currentUser,
         Guid inventoryId,
         CancellationToken cancellationToken = default)
     {
@@ -17,7 +13,7 @@ internal static class InventoryAccessLoader
         if (inventory is null)
             return InventoryErrors.NotFound(inventoryId);
 
-        if (!permissionService.CanManageInventory(inventory))
+        if (!InventoryPermissions.CanManageInventory(currentUser, inventory))
             return InventoryErrors.AccessDenied();
 
         return inventory;

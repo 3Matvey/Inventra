@@ -1,5 +1,3 @@
-using Inventra.Application.Common.Results;
-
 namespace Inventra.Application.Identity;
 
 public static class IdentityErrors

@@ -1,5 +1,3 @@
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Identity;
 
 internal static class UserProfileMapping

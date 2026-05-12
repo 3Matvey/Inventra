@@ -1,6 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-
 namespace Inventra.Application.Identity.GetCurrentUserProfile;
 
 public sealed class GetCurrentUserProfileUseCase(

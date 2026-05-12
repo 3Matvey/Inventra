@@ -1,13 +1,9 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
-
 namespace Inventra.Application.Inventories.UpdateInventorySettings;
 
 public sealed class UpdateInventorySettingsUseCase(
     IInventoryRepository inventoryRepository,
     ICategoryRepository categoryRepository,
-    IInventoryPermissionService permissionService,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -15,9 +11,9 @@ public sealed class UpdateInventorySettingsUseCase(
         UpdateInventorySettingsRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccessLoader.LoadManageableAsync(
+        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
             inventoryRepository,
-            permissionService,
+            currentUser,
             request.InventoryId,
             cancellationToken);
 

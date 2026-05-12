@@ -1,13 +1,11 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Application.Common.Results;
-using Inventra.Domain.Entities;
+using Inventra.Application.Inventories;
 
 namespace Inventra.Application.Items.DeleteInventoryItem;
 
 public sealed class DeleteInventoryItemUseCase(
+    ICurrentUser currentUser,
     IInventoryRepository inventoryRepository,
     IInventoryItemRepository itemRepository,
-    IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
     : IUseCase
 {
@@ -33,7 +31,7 @@ public sealed class DeleteInventoryItemUseCase(
         InventoryItem item,
         CancellationToken cancellationToken)
     {
-        if (!permissionService.CanWriteItems(inventory))
+        if (!InventoryPermissions.CanWriteItems(currentUser, inventory))
             return ItemErrors.AccessDenied();
 
         itemRepository.Remove(item);

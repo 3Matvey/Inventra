@@ -1,7 +1,3 @@
-using Inventra.Application.Common.Interfaces;
-using Inventra.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-
 namespace Inventra.Infrastructure.Data.Repositories;
 
 public class CategoryRepository(AppDbContext dbContext) : ICategoryRepository
