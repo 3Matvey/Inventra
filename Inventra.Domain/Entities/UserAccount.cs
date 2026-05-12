@@ -19,6 +19,12 @@ public sealed class UserAccount : AuditableEntity
         ChangeEmail(email);
     }
 
+    public UserAccount(Guid id, string userName, string email)
+        : this(userName, email)
+    {
+        Id = Guard.RequiredId(id);
+    }
+
     public void Rename(string userName)
     {
         UserName = Guard.Required(userName);

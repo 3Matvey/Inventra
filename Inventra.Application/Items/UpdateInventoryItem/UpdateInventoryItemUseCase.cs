@@ -10,6 +10,7 @@ public sealed class UpdateInventoryItemUseCase(
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         UpdateInventoryItemRequest request,

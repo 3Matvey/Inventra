@@ -9,6 +9,7 @@ public sealed class AddInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result<Guid>> ExecuteAsync(
         AddInventoryFieldRequest request,

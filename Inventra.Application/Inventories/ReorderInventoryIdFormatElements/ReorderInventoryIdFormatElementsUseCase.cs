@@ -8,6 +8,7 @@ public sealed class ReorderInventoryIdFormatElementsUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         ReorderInventoryIdFormatElementsRequest request,

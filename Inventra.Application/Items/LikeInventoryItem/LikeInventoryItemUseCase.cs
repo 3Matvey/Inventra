@@ -9,6 +9,7 @@ public sealed class LikeInventoryItemUseCase(
     IInventoryPermissionService permissionService,
     TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         LikeInventoryItemRequest request,

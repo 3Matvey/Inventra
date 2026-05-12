@@ -9,6 +9,7 @@ public sealed class AddInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result<Guid>> ExecuteAsync(
         AddInventoryIdFormatElementRequest request,

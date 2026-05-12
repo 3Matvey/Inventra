@@ -15,6 +15,7 @@ public sealed class CreateInventoryItemUseCase(
     IInventorySequenceProvider sequenceProvider,
     TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result<Guid>> ExecuteAsync(
         CreateInventoryItemRequest request,

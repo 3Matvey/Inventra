@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Inventra.Application\Inventra.Application.csproj" />
     <ProjectReference Include="..\Inventra.Infrastructure.Data\Inventra.Infrastructure.Data.csproj" />
+    <ProjectReference Include="..\Inventra.Infrastructure.Identity\Inventra.Infrastructure.Identity.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,6 +10,7 @@ public sealed class CreateInventoryUseCase(
     ICategoryRepository categoryRepository,
     ITagRepository tagRepository,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result<Guid>> ExecuteAsync(
         CreateInventoryRequest request,

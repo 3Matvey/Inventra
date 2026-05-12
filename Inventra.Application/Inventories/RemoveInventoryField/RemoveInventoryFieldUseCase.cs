@@ -8,6 +8,7 @@ public sealed class RemoveInventoryFieldUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         RemoveInventoryFieldRequest request,

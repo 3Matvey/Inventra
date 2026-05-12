@@ -9,6 +9,7 @@ public sealed class DeleteInventoryItemUseCase(
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         DeleteInventoryItemRequest request,

@@ -10,6 +10,7 @@ public sealed class GrantInventoryAccessUseCase(
     IInventoryPermissionService permissionService,
     TimeProvider timeProvider,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result<Guid>> ExecuteAsync(
         GrantInventoryAccessRequest request,

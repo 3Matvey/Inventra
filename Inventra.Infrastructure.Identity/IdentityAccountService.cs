@@ -1,0 +1,58 @@
+using Inventra.Application.Common.Interfaces;
+using Microsoft.AspNetCore.Identity;
+
+namespace Inventra.Infrastructure.Identity;
+
+public class IdentityAccountService(
+    UserManager<ApplicationUser> userManager,
+    RoleManager<IdentityRole<Guid>> roleManager) : IIdentityAccountService
+{
+    public async Task SetAdminRoleAsync(
+        Guid userId,
+        bool isAdmin,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        if (user is null)
+            return;
+
+        await EnsureAdminRoleAsync();
+
+        if (isAdmin && !await userManager.IsInRoleAsync(user, IdentityRoles.Admin))
+            await userManager.AddToRoleAsync(user, IdentityRoles.Admin);
+
+        if (!isAdmin && await userManager.IsInRoleAsync(user, IdentityRoles.Admin))
+            await userManager.RemoveFromRoleAsync(user, IdentityRoles.Admin);
+    }
+
+    public async Task SetBlockedAsync(
+        Guid userId,
+        bool isBlocked,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        if (user is null)
+            return;
+
+        user.LockoutEnabled = true;
+        user.LockoutEnd = isBlocked ? DateTimeOffset.MaxValue : null;
+
+        await userManager.UpdateAsync(user);
+    }
+
+    public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        if (user is not null)
+            await userManager.DeleteAsync(user);
+    }
+
+    private async Task EnsureAdminRoleAsync()
+    {
+        if (!await roleManager.RoleExistsAsync(IdentityRoles.Admin))
+            await roleManager.CreateAsync(new IdentityRole<Guid>(IdentityRoles.Admin));
+    }
+}

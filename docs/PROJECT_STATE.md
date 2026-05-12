@@ -383,17 +383,79 @@ Program.cs currently has:
 
 - controllers
 - OpenAPI
+- Application services
+- Data services
+- Identity services
+- authentication
 - HTTPS redirection
 - authorization
 
 Still needed:
 
-- call `builder.Services.AddDataServices(builder.Configuration)`
-- add Application DI extension later
-- add `ControllerBaseWithResult`
-- add controllers
-- auth/current user implementation
 - permission service implementation
+
+## Infrastructure.Identity
+
+ASP.NET Core Identity has been introduced as a separate infrastructure project.
+
+Current design:
+
+- `ApplicationUser : IdentityUser<Guid>` is infrastructure-only.
+- Domain still uses `UserAccount` for business rules, access grants, ownership, comments, likes, admin/block flags.
+- Identity user and domain user share the same `Guid`.
+- External login provisioning creates/uses the Identity user, then `CompleteExternalLoginUseCase` creates/updates the matching `UserAccount`.
+- Google and Facebook authentication are wired only when config sections exist:
+  - `Authentication:Google:ClientId`
+  - `Authentication:Google:ClientSecret`
+  - `Authentication:Facebook:AppId`
+  - `Authentication:Facebook:AppSecret`
+- Names are intentionally provider-neutral (`ExternalUserInfo`, `IExternalIdentityService`) so Telegram bot auth can be added later as another external identity flow.
+
+Important classes:
+
+- `ApplicationIdentityDbContext`
+- `CurrentUser`
+- `ExternalIdentityService`
+- `AuthenticationSession`
+- `IdentityAccountService`
+- `IdentityRoles.Admin`
+
+Application identity use cases:
+
+- `CompleteExternalLoginUseCase`
+- `GetCurrentUserProfileUseCase`
+- `GetUsersPageUseCase`
+- `ChangeUserAdminRoleUseCase`
+- `ChangeUserBlockStatusUseCase`
+- `DeleteUserUseCase`
+
+API identity endpoints:
+
+- `GET /auth/external/{provider}`
+- `GET /auth/external/callback`
+- `POST /auth/logout`
+- `GET /auth/me`
+- `GET /admin/users`
+- `POST /admin/users/{userId}/block`
+- `POST /admin/users/{userId}/unblock`
+- `POST /admin/users/{userId}/admin-role`
+- `DELETE /admin/users/{userId}/admin-role`
+- `DELETE /admin/users/{userId}`
+
+API helper:
+
+- `ApiControllerBase` maps `Result` / `Result<T>` to HTTP responses.
+
+Important behavior:
+
+- Admin role can be removed from any user, including the current user, matching the assignment requirement.
+- Blocked users are signed out after external login completion.
+- Blocking also sets Identity lockout.
+- Deleting a user removes both `UserAccount` and the Identity user.
+
+Still needed:
+
+- Add migrations for both Data and Identity contexts, or decide whether to merge Identity into one migration flow.
 
 ## Local PostgreSQL / Docker Compose Plan
 
@@ -472,22 +534,19 @@ dotnet ef database update `
 
 Backend priorities:
 
-1. Wire Data services in API.
-2. Add Docker Compose and local connection string.
-3. Create initial migration and inspect generated schema carefully.
-4. Add Application DI extension.
-5. Implement `IInventoryPermissionService`.
-6. Implement `ICurrentUser`.
-7. Add API controllers:
+1. Add Docker Compose for local Postgres.
+2. Create initial migration and inspect generated schema carefully.
+3. Add auth/current-user/admin controllers.
+4. Implement `IInventoryPermissionService`.
+5. Add API controllers:
    - inventories
    - fields
    - access settings
    - id format
    - items
    - likes
-8. Add comments use cases/controllers.
-9. Add admin user use cases/controllers.
-10. Add read-side queries:
+6. Add comments use cases/controllers.
+7. Add read-side queries:
     - latest inventories
     - top inventories
     - inventory details

@@ -8,6 +8,7 @@ public sealed class RemoveInventoryIdFormatElementUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         RemoveInventoryIdFormatElementRequest request,

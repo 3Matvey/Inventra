@@ -8,6 +8,7 @@ public sealed class UnlikeInventoryItemUseCase(
     IInventoryItemRepository itemRepository,
     IInventoryPermissionService permissionService,
     IUnitOfWork unitOfWork)
+    : IUseCase
 {
     public async Task<Result> ExecuteAsync(
         UnlikeInventoryItemRequest request,

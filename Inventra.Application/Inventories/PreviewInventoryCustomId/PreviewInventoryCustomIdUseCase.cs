@@ -9,6 +9,7 @@ public sealed class PreviewInventoryCustomIdUseCase(
     IInventoryRepository inventoryRepository,
     IInventoryPermissionService permissionService,
     TimeProvider timeProvider)
+    : IUseCase
 {
     public async Task<Result<string>> ExecuteAsync(
         PreviewInventoryCustomIdRequest request,
