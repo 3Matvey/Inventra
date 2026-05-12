@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:18.3
     container_name: inventra-postgres
-    restart: usless-stopped
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
