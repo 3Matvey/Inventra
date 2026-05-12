@@ -8,23 +8,20 @@ public abstract class ApiControllerBase : ControllerBase
 {
     protected IActionResult FromResult(Result result)
     {
-        return result.IsSuccess
-            ? NoContent()
-            : FromError(result.Error);
+        return result.Match(
+            NoContent,
+            FromError);
     }
 
     protected IActionResult FromResult<TValue>(Result<TValue> result)
     {
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : FromError(result.Error);
+        return result.Match(
+            value => Ok(value),
+            FromError);
     }
 
-    private IActionResult FromError(Error? error)
+    protected IActionResult FromError(Error error)
     {
-        if (error is null)
-            return Problem();
-
         return error.ErrorType switch
         {
             ErrorType.BadRequest => BadRequest(error),

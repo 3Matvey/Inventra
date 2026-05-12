@@ -1,24 +1,25 @@
 using Inventra.Application;
 using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddApplicationServices();
-builder.Services.AddDataServices(builder.Configuration);
-builder.Services.AddIdentityServices(builder.Configuration);
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddApplicationServices()
+    .AddDataServices(configuration)
+    .AddIdentityServices(configuration);
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

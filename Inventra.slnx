@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".env" />
+    <File Path="compose.yaml" />
+  </Folder>
   <Project Path="Inventra.Api/Inventra.Api.csproj" />
   <Project Path="Inventra.Application/Inventra.Application.csproj" />
   <Project Path="Inventra.Domain/Inventra.Domain.csproj" />

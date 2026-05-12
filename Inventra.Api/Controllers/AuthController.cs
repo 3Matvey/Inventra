@@ -1,4 +1,6 @@
 using Inventra.Application.Common.Interfaces;
+using Inventra.Application.Common.Results;
+using Inventra.Application.Identity;
 using Inventra.Application.Identity.CompleteExternalLogin;
 using Inventra.Application.Identity.GetCurrentUserProfile;
 using Microsoft.AspNetCore.Authentication;
@@ -26,7 +28,9 @@ public class AuthController : ApiControllerBase
     {
         var result = await useCase.ExecuteAsync(cancellationToken);
 
-        return result.IsSuccess ? LocalRedirect(returnUrl) : FromResult(result);
+        return result.Match(
+            _ => LocalRedirect(returnUrl),
+            FromError);
     }
 
     [HttpPost("logout")]
