@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Inventra.Infrastructure.Identity;
 
-public class ExternalIdentityService(
+internal class ExternalIdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager) : IExternalIdentityService
 {

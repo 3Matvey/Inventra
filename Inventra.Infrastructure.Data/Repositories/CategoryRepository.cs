@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data.Repositories;
 
-public class CategoryRepository(AppDbContext dbContext) : ICategoryRepository
+internal class CategoryRepository(AppDbContext dbContext) : ICategoryRepository
 {
     public Task<Category?> GetByIdAsync(
         Guid id,

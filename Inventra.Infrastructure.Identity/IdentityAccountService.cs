@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Inventra.Infrastructure.Identity;
 
-public class IdentityAccountService(
+internal class IdentityAccountService(
     UserManager<ApplicationUser> userManager,
     RoleManager<IdentityRole<Guid>> roleManager) : IIdentityAccountService
 {

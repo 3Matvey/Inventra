@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IUnitOfWork
+internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IUnitOfWork
 {
     public DbSet<Category> Categories => Set<Category>();
 

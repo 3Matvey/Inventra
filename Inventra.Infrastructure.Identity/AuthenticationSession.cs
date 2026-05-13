@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Inventra.Infrastructure.Identity;
 
-public class AuthenticationSession(
+internal class AuthenticationSession(
     IHttpContextAccessor httpContextAccessor,
     SignInManager<ApplicationUser> signInManager) : IAuthenticationSession
 {

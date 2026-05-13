@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data.Repositories;
 
-public class InventoryItemRepository(AppDbContext dbContext) : IInventoryItemRepository
+internal class InventoryItemRepository(AppDbContext dbContext) : IInventoryItemRepository
 {
     public Task<InventoryItem?> GetByIdAsync(
         Guid id,

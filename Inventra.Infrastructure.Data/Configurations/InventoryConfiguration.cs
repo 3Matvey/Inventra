@@ -13,6 +13,10 @@ internal class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         builder.Property(x => x.ImageUrl).HasMaxLength(2048);
         builder.Property(x => x.Version).IsConcurrencyToken();
 
+        builder.HasIndex(x => new { x.Title, x.DescriptionMarkdown })
+            .HasMethod("GIN")
+            .IsTsVectorExpressionIndex("simple");
+
         builder.HasMany(x => x.Fields).WithOne().HasForeignKey(x => x.InventoryId);
         builder.HasMany(x => x.AccessGrants).WithOne().HasForeignKey(x => x.InventoryId);
         builder.HasMany(x => x.IdFormatElements).WithOne().HasForeignKey(x => x.InventoryId);

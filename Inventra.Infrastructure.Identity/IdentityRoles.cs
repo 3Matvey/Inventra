@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Identity;
 
-public static class IdentityRoles
+internal static class IdentityRoles
 {
     public const string Admin = "Admin";
 }

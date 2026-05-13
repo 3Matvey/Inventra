@@ -1,4 +1,7 @@
 using Inventra.Infrastructure.Data.Repositories;
+using Inventra.Infrastructure.Data.Queries;
+using Inventra.Application.Inventories.Queries;
+using Inventra.Application.Items.Queries;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +15,7 @@ public static class DependencyInjection
         {
             services.AddDatabase(configuration);
             services.AddRepositories();
+            services.AddQueries();
             services.AddUnitOfWork();
 
             return services;
@@ -39,6 +43,14 @@ public static class DependencyInjection
             services.AddScoped<IInventorySequenceProvider, InventorySequenceProvider>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+
+            return services;
+        }
+
+        private IServiceCollection AddQueries()
+        {
+            services.AddScoped<IInventoryQueries, InventoryQueries>();
+            services.AddScoped<IInventoryItemQueries, InventoryItemQueries>();
 
             return services;
         }

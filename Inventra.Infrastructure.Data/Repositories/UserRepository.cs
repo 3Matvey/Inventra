@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data.Repositories;
 
-public class UserRepository(AppDbContext dbContext) : IUserRepository
+internal class UserRepository(AppDbContext dbContext) : IUserRepository
 {
     public Task<UserAccount?> GetByIdAsync(
         Guid id,

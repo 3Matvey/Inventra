@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Inventra.Infrastructure.Identity;
 
-public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
+internal class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
     public Guid? UserId
     {

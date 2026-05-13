@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data.Repositories;
 
-public class TagRepository(AppDbContext dbContext) : ITagRepository
+internal class TagRepository(AppDbContext dbContext) : ITagRepository
 {
     public Task<Tag?> GetByNameAsync(
         string name,

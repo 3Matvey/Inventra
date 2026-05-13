@@ -1,6 +1,6 @@
 namespace Inventra.Infrastructure.Data.Repositories;
 
-public class InventorySequenceProvider(AppDbContext dbContext) : IInventorySequenceProvider
+internal class InventorySequenceProvider(AppDbContext dbContext) : IInventorySequenceProvider
 {
     public async Task<long> GetNextSequenceAsync(
         Guid inventoryId,

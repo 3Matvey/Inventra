@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Inventra.Infrastructure.Data;
 
-public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
+internal class AuditInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
     public override InterceptionResult<int> SavingChanges(
        DbContextEventData eventData,
