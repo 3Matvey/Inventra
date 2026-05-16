@@ -1,4 +1,6 @@
 using Inventra.Application.Common.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +25,8 @@ public static class DependencyInjection
 
         private IServiceCollection AddIdentityDatabase(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
             services.AddDbContext<ApplicationIdentityDbContext>(options =>
                 options
@@ -51,7 +54,7 @@ public static class DependencyInjection
         {
             services.ConfigureApplicationCookie()
                 .AddGoogleIfConfigured(configuration)
-                .AddFacebookIfConfigured(configuration);
+                .AddGitHubIfConfigured(configuration);
 
             return services;
         }
@@ -85,32 +88,80 @@ public static class DependencyInjection
         {
             var section = configuration.GetSection("Authentication:Google");
 
-            if (!section.Exists())
+            if (!IsConfigured(section, "ClientId", "ClientSecret"))
                 return services;
 
             services.AddAuthentication().AddGoogle(options =>
             {
-                options.ClientId = section["ClientId"] ?? string.Empty;
-                options.ClientSecret = section["ClientSecret"] ?? string.Empty;
+                ConfigureOAuth(options, section);
+                options.CallbackPath = "/signin-google";
             });
 
             return services;
         }
 
-        private IServiceCollection AddFacebookIfConfigured(IConfiguration configuration)
+        private IServiceCollection AddGitHubIfConfigured(IConfiguration configuration)
         {
-            var section = configuration.GetSection("Authentication:Facebook");
+            var section = configuration.GetSection("Authentication:GitHub");
 
-            if (!section.Exists())
+            if (!IsConfigured(section, "ClientId", "ClientSecret"))
                 return services;
 
-            services.AddAuthentication().AddFacebook(options =>
+            services.AddAuthentication().AddGitHub(options =>
             {
-                options.AppId = section["AppId"] ?? string.Empty;
-                options.AppSecret = section["AppSecret"] ?? string.Empty;
+                ConfigureOAuth(options, section);
+                options.CallbackPath = "/signin-github";
+                options.Scope.Add("user:email");
             });
 
             return services;
         }
+    }
+
+    private static void ConfigureOAuth(OAuthOptions options, IConfigurationSection section)
+    {
+        options.ClientId = GetRequired(section, "ClientId");
+        options.ClientSecret = GetRequired(section, "ClientSecret");
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+    }
+
+    private static bool IsConfigured(IConfigurationSection section, params string[] keys)
+    {
+        var presentKeysCount = keys.Count(key => !string.IsNullOrWhiteSpace(section[key]));
+
+        return presentKeysCount switch
+        {
+            0 => false,
+            var count when count == keys.Length => true, // all required keys are configured.
+            _ => throw CreatePartialConfigurationException(section, keys)
+        };
+    }
+
+    private static string GetRequired(IConfigurationSection section, string key)
+    {
+        var value = section[key];
+
+        return !string.IsNullOrWhiteSpace(value)
+            ? value
+            : throw CreateMissingConfigurationException(section, key);
+    }
+
+    private static InvalidOperationException CreateMissingConfigurationException(
+        IConfigurationSection section,
+        string key)
+    {
+        return new InvalidOperationException(
+            $"Required configuration key '{section.Path}:{key}' is missing.");
+    }
+
+    private static InvalidOperationException CreatePartialConfigurationException(
+        IConfigurationSection section,
+        string[] keys)
+    {
+        var expectedKeys = string.Join(", ", keys.Select(key => $"{section.Path}:{key}"));
+
+        return new InvalidOperationException(
+            $"External auth provider '{section.Path}' is partially configured. " +
+            $"Required keys: {expectedKeys}.");
     }
 }

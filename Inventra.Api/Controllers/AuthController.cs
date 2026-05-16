@@ -12,15 +12,25 @@ namespace Inventra.Api.Controllers;
 public class AuthController : ApiControllerBase
 {
     [HttpGet("external/{provider}")]
-    public IActionResult ExternalChallenge(string provider, string returnUrl = "/")
+    public async Task<IActionResult> ExternalChallenge(
+        string provider,
+        [FromServices] IAuthenticationSchemeProvider schemes,
+        string returnUrl = "/")
     {
+        if (await schemes.GetSchemeAsync(provider) is null)
+            return BadRequest($"External authentication provider '{provider}' is not configured.");
+
         var redirectUrl = Url.Action(nameof(ExternalCallback), new { returnUrl });
-        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        var properties = new AuthenticationProperties
+        {
+            RedirectUri = redirectUrl,
+            Items = { ["LoginProvider"] = provider }
+        };
 
         return Challenge(properties, provider);
     }
 
-    [HttpGet("external/callback")]
+    [HttpGet("external-login/callback")]
     public async Task<IActionResult> ExternalCallback(
         [FromServices] CompleteExternalLoginUseCase useCase,
         string returnUrl = "/",

@@ -1,9 +1,12 @@
+using Inventra.Api;
 using Inventra.Application;
 using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddPortableSecrets();
 var configuration = builder.Configuration;
 
 

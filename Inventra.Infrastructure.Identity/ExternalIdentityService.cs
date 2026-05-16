@@ -2,12 +2,14 @@ using System.Security.Claims;
 using Inventra.Application.Common.Interfaces;
 using Inventra.Application.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Inventra.Infrastructure.Identity;
 
 internal class ExternalIdentityService(
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) : IExternalIdentityService
+    SignInManager<ApplicationUser> signInManager,
+    ILogger<ExternalIdentityService> logger) : IExternalIdentityService
 {
     public async Task<ExternalUserInfo?> CompleteSignInAsync(
         CancellationToken cancellationToken = default)
@@ -51,9 +53,24 @@ internal class ExternalIdentityService(
         var created = await userManager.CreateAsync(user);
 
         if (!created.Succeeded)
+        {
+            logger.LogWarning(
+                "External user creation failed for provider {Provider}. Errors: {Errors}.",
+                loginInfo.LoginProvider,
+                string.Join("; ", created.Errors.Select(error => error.Description)));
+
             return null;
+        }
 
         var linked = await userManager.AddLoginAsync(user, loginInfo);
+
+        if (!linked.Succeeded)
+        {
+            logger.LogWarning(
+                "External login link failed for provider {Provider}. Errors: {Errors}.",
+                loginInfo.LoginProvider,
+                string.Join("; ", linked.Errors.Select(error => error.Description)));
+        }
 
         return linked.Succeeded ? user : null;
     }
@@ -73,7 +90,7 @@ internal class ExternalIdentityService(
     private static string GetEmail(ExternalLoginInfo loginInfo)
     {
         return loginInfo.Principal.FindFirstValue(ClaimTypes.Email)
-            ?? $"{loginInfo.ProviderKey}@{loginInfo.LoginProvider}.external";
+            ?? $"{loginInfo.ProviderKey}@{loginInfo.LoginProvider}.external";   //TODO 
     }
 
     private static string GetUserName(ExternalLoginInfo loginInfo, string email)
