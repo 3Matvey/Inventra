@@ -7,4 +7,8 @@ namespace Inventra.Infrastructure.Identity;
 /// </summary>
 internal class ApplicationUser : IdentityUser<Guid>
 {
+    public ApplicationUser()
+    {
+        Id = Guid.CreateVersion7();
+    }
 }

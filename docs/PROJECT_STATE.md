@@ -1,189 +1,126 @@
 # Inventra Project State
 
-Last updated: 2026-05-11
+Last updated: 2026-05-16
 
-This file is a handoff note for continuing work in a new chat/context. It captures the current architecture, decisions, implemented pieces, style rules, and next steps.
+This document is the handoff map for continuing work after context loss. Treat the codebase as the source of truth, but keep this file in sync when architecture or implemented scope changes.
 
-## Goal
+## Product Goal
 
-Inventra is an ASP.NET/C# inventory management web application.
+Inventra is an ASP.NET Core/C# web application for inventory management.
 
-Core product concepts:
+Core assignment requirements:
 
-- Users create arbitrary inventories.
-- Each inventory defines settings, access rules, custom item fields, and a custom item ID format.
-- Other users with write access create/edit/delete items using that inventory template.
-- Everyone can view inventories/items.
-- Authenticated users can create inventories, comment, like, and add items when allowed.
+- Inventories and items are displayed as table views by default.
+- Do not put repeated view/edit/delete buttons in every table row.
+- Anonymous users can view inventories/items and use search in read-only mode.
+- Authenticated users can create inventories, comment, like, and add/edit items when allowed.
 - Admins can manage users and act as owner for every inventory.
-
-Important assignment requirements:
-
-- Items and inventories must be shown as tables by default.
-- No repeated row buttons like `[Edit][Delete]` in every row.
-- Full-text search available from top header.
-- Custom inventory numbers are required.
-- Custom fields are required.
+- Users authenticate via at least two social providers.
+- Every page should expose full-text search from the top header.
+- Inventories have custom item fields.
+- Inventories have custom inventory number formats.
 - Optimistic locking is required for inventories and items.
-- PostgreSQL is likely the DB.
-- CSS/front-end will be done near the end.
+- Discussion posts need near-real-time updates within 2-5 seconds.
+- UI must support two languages and two themes.
 
-## Current Solution Structure
+Current implementation focus:
+
+- Backend first.
+- Frontend, cloud image upload UX, and visual polish are still future work.
+
+## Solution Structure
 
 Projects:
 
 - `Inventra.Domain`
 - `Inventra.Application`
 - `Inventra.Infrastructure.Data`
+- `Inventra.Infrastructure.Identity`
 - `Inventra.Api`
 
-Solution file:
+Solution:
 
 - `Inventra.slnx`
 
-## Coding Style Rules
+Database:
 
-Project-specific style preferences from the user:
+- PostgreSQL 18.3 for local development.
+- EF Core 10/Npgsql.
+- `compose.yaml` uses `.env` variables and volume path `/var/lib/postgresql`.
 
-- Methods should generally be short, around 5-10 lines when possible.
-- Do not add interfaces for use cases when there is only one implementation.
-- Interfaces are for boundaries/ports, not for every class.
-- Avoid unnecessary `sealed`, especially for obvious classes like EF configurations.
-- Use helper classes/methods to remove repeated guard checks.
-- Do not silently overwrite user edits. Read files before changing them.
-- Prefer readable `using` statements over fully qualified names like `Domain.Entities.Inventory`.
-- `DependencyInjection` extension files should use the new C# extension block style:
+## Team Rules
 
-```csharp
-public static class DependencyInjection
-{
-    extension(IServiceCollection services)
-    {
-        public IServiceCollection AddDataServices(IConfiguration configuration)
-        {
-            services.AddDatabase(configuration);
-            services.AddRepositories();
-            services.AddUnitOfWork();
+Important working preferences:
 
-            return services;
-        }
-
-        private IServiceCollection AddDatabase(IConfiguration configuration)
-        {
-            ...
-        }
-    }
-}
-```
+- Do not make unrequested infrastructure changes.
+- Do not change Docker Compose, migrations, secrets, or deployment-related configuration without explicit permission.
+- Use `apply_patch` for manual file edits.
+- Keep public API objects one public type per file.
+- Add XML summaries for externally consumed interfaces/DTOs when useful.
+- Use the project's existing style and C# extension block DI pattern.
+- Keep methods short where practical, roughly 5-10 lines, but query code may naturally be longer.
+- Interfaces are for ports/boundaries. Avoid interfaces for classes with no meaningful alternate implementation.
+- Use `IUseCase` as the marker for use case registration.
 
 ## Domain Layer
 
-Important base classes:
+Important base types:
 
 - `Entity`
-  - `Id` is generated in code using `Guid.CreateVersion7()`.
-  - EF must use `ValueGeneratedNever()`.
-
+  - `Id` is generated in code with `Guid.CreateVersion7()`.
+  - EF uses `ValueGeneratedNever()`.
 - `AuditableEntity`
-  - Has `CreatedAt` and `UpdatedAt`.
-  - These are now set by EF Core `AuditInterceptor`.
-  - Domain methods should not call `Touch`.
-  - Domain constructors should not take audit-only `createdAt`.
+  - `CreatedAt` and `UpdatedAt` are handled by `AuditInterceptor`.
 
 Important entities:
 
 - `UserAccount`
-  - `UserName`
-  - `Email`
-  - `IsBlocked`
-  - `IsAdmin`
-
-- `Category`
-  - Database-driven category table.
-  - No enum category code.
-
-- `Tag`
-
+  - Domain-facing user profile.
+  - Stores `UserName`, `Email`, `IsBlocked`, `IsAdmin`.
 - `Inventory`
-  - Aggregate root for inventory settings.
-  - Owns fields/access grants/id format elements/tags/comments.
+  - Aggregate root for settings, fields, access, custom ID format, tags, comments.
   - Has `Version` for optimistic locking.
-  - Important methods:
-    - `UpdateSettings`
-    - `SetPublicWriteAccess`
-    - `GrantAccess`
-    - `RevokeAccess`
-    - `AddField`
-    - `UpdateField`
-    - `RemoveField`
-    - `ReorderFields`
-    - `AddIdFormatElement`
-    - `UpdateIdFormatElement`
-    - `RemoveIdFormatElement`
-    - `ReorderIdFormatElements`
-    - `ReplaceTags`
-    - `AddComment`
-
 - `InventoryField`
   - Custom field definition.
   - Types: single-line text, multi-line text, number, link, boolean.
   - Has `ShowInTable` and `Order`.
-
 - `InventoryIdFormatElement`
-  - Custom item ID format element.
-  - Types: fixed text, random 20-bit, random 32-bit, random 6-digit, random 9-digit, GUID, date/time, sequence.
-
+  - Custom ID format element.
+  - Supports fixed text, random numbers, GUID, date/time, sequence.
 - `InventoryItem`
-  - Item inside inventory.
-  - Has internal `Id`.
-  - Has user-facing `CustomId`.
-  - Has nullable `SequenceNumber`.
-  - Has `Version`.
-  - Owns field values and likes.
-
+  - Has internal `Id`, user-facing `CustomId`, optional `SequenceNumber`, `Version`, custom field values, likes.
 - `ItemFieldValue`
-  - Stores custom field value using typed nullable columns:
-    - `TextValue`
-    - `NumberValue`
-    - `BooleanValue`
-
+  - Stores typed nullable columns: text, number, boolean.
 - `ItemLike`
   - One like per item per user.
-
 - `InventoryAccessGrant`
   - Explicit write access for a user.
-
 - `InventoryComment`
   - Linear discussion post.
-  - `CreatedAt` is business data, not only audit.
 
-Value objects/helpers:
+Helpers:
 
 - `FieldValue`
-  - Used by Application/domain methods to map request values into typed field values safely.
 - `Guard`
-  - Uses `CallerArgumentExpression`.
-  - Has helpers such as `RequiredId`, `Required`, `Optional`, `NonNegative`, `RequiredIds`, `RequiredCompleteIdSet`.
 
 ## Application Layer
 
-No MediatR.
+No MediatR. Use cases are concrete classes with `ExecuteAsync`.
 
-Use cases are concrete classes with `ExecuteAsync`.
+Use case registration:
 
-Result pattern is in:
+- `IUseCase` is a marker interface.
+- `AddUseCases()` scans the Application assembly for concrete classes assignable to `IUseCase`.
 
-- `Inventra.Application/Common/Results`
-
-Types:
+Result pattern:
 
 - `Result`
 - `Result<T>`
 - `Error`
 - `ErrorType`
-- `ResultExtensions`
+- `ResultExtensions.Match(...)`
 
-Ports/interfaces:
+Important ports:
 
 - `ICurrentUser`
 - `IUnitOfWork`
@@ -192,55 +129,39 @@ Ports/interfaces:
 - `ICategoryRepository`
 - `ITagRepository`
 - `IUserRepository`
-- `IInventoryPermissionService`
+- `IIdentityAccountService`
+- `IExternalIdentityService`
+- `IAuthenticationSession`
 - `ICustomIdGenerator`
 - `IInventorySequenceProvider`
 
-`IDateTimeProvider` was removed/replaced by built-in `TimeProvider`.
+Important helpers/services:
 
-Implemented write use cases:
+- `InventoryPermissions`
+  - Static helper, replaced the old `IInventoryPermissionService`.
+  - Used by use cases for owner/admin/write-access checks.
+- `InventoryAccessLoader`
+- `InventoryCustomIdComposer`
+- `InventoryCustomIdGenerator`
 
-Inventories:
+Implemented inventory write use cases:
 
 - `CreateInventoryUseCase`
 - `UpdateInventorySettingsUseCase`
-
-Fields:
-
+- `SetPublicWriteAccessUseCase`
+- `GrantInventoryAccessUseCase`
+- `RevokeInventoryAccessUseCase`
 - `AddInventoryFieldUseCase`
 - `UpdateInventoryFieldUseCase`
 - `RemoveInventoryFieldUseCase`
 - `ReorderInventoryFieldsUseCase`
-
-Access:
-
-- `SetPublicWriteAccessUseCase`
-- `GrantInventoryAccessUseCase`
-- `RevokeInventoryAccessUseCase`
-
-Custom ID format:
-
 - `AddInventoryIdFormatElementUseCase`
 - `UpdateInventoryIdFormatElementUseCase`
 - `RemoveInventoryIdFormatElementUseCase`
 - `ReorderInventoryIdFormatElementsUseCase`
 - `PreviewInventoryCustomIdUseCase`
 
-Custom ID generation:
-
-- `InventoryCustomIdComposer`
-- `InventoryCustomIdGenerator`
-
-Important current design:
-
-- `ICustomIdGenerator.Generate(...)` does not fetch sequence itself.
-- It only formats the custom ID from:
-  - inventory format elements
-  - nullable sequence number
-  - creation timestamp
-- `IInventorySequenceProvider` is responsible for issuing sequence numbers.
-
-Items:
+Implemented item write use cases:
 
 - `CreateInventoryItemUseCase`
 - `UpdateInventoryItemUseCase`
@@ -248,179 +169,7 @@ Items:
 - `LikeInventoryItemUseCase`
 - `UnlikeInventoryItemUseCase`
 
-Item create flow:
-
-1. Check authentication.
-2. Load inventory.
-3. Check `CanWriteItems`.
-4. If inventory ID format contains sequence element, ask `IInventorySequenceProvider` for the next number.
-5. Generate custom ID.
-6. Create `InventoryItem` with `CustomId` and nullable `SequenceNumber`.
-7. Set custom field values.
-8. Add item.
-9. Save changes.
-
-## Infrastructure.Data
-
-Uses EF Core + PostgreSQL.
-
-Packages:
-
-- `Microsoft.EntityFrameworkCore`
-- `Microsoft.EntityFrameworkCore.Design`
-- `Npgsql.EntityFrameworkCore.PostgreSQL`
-- `EFCore.NamingConventions`
-
-Current naming:
-
-- `UseSnakeCaseNamingConvention()` is enabled.
-- Do not manually call `ToTable(...)` unless there is a special reason.
-- Database tables/columns should be snake_case.
-- Raw SQL must use snake_case names.
-
-DbContext:
-
-- `AppDbContext : DbContext, IUnitOfWork`
-- `SaveChangesAsync` comes from `DbContext`.
-- `IUnitOfWork` is registered to use the same scoped `AppDbContext`.
-
-Audit:
-
-- `AuditInterceptor` sets:
-  - `CreatedAt` for added `AuditableEntity`
-  - `UpdatedAt` for modified `AuditableEntity`
-- Registered in `AddDbContext` using `.AddInterceptors(...)`.
-
-Configurations:
-
-- Located in `Inventra.Infrastructure.Data/Configurations`.
-- Use `IEntityTypeConfiguration<T>`.
-- `EntityConfiguration.ConfigureId()` sets:
-  - key
-  - `ValueGeneratedNever()`
-
-Important EF indexes:
-
-- Inventory item custom ID:
-  - unique `(inventory_id, custom_id)`
-- Inventory item sequence:
-  - unique partial `(inventory_id, sequence_number)` where `sequence_number IS NOT NULL`
-- Item like:
-  - unique `(item_id, user_id)`
-- Inventory access grant:
-  - unique `(inventory_id, user_id)`
-- Inventory tag:
-  - unique `(inventory_id, tag_id)`
-- Tag name unique.
-- Category name unique.
-- User name and email unique.
-
-Repositories:
-
-- `InventoryRepository`
-- `InventoryItemRepository`
-- `CategoryRepository`
-- `TagRepository`
-- `UserRepository`
-
-These are command repositories and should return tracked entities.
-
-`InventoryRepository.GetByIdAsync` includes:
-
-- fields
-- access grants
-- id format elements
-- tags
-- comments
-
-`InventoryItemRepository.GetByIdAsync` includes:
-
-- field values
-- likes
-
-Sequence:
-
-- Data model: `InventorySequence`
-  - `InventoryId`
-  - `NextValue`
-- `InventorySequenceProvider` uses PostgreSQL atomic upsert:
-
-```sql
-INSERT INTO inventory_sequences (inventory_id, next_value)
-VALUES (@inventoryId, 2)
-ON CONFLICT (inventory_id)
-DO UPDATE SET next_value = inventory_sequences.next_value + 1
-RETURNING inventory_sequences.next_value - 1 AS "Value"
-```
-
-This means:
-
-- first sequence is 1;
-- next stored value becomes 2;
-- concurrent calls are serialized by PostgreSQL row update;
-- gaps are possible if item save fails after sequence issue, and that is acceptable for inventory IDs.
-
-Dependency injection:
-
-- `Inventra.Infrastructure.Data/DependencyInjection.cs`
-- Public extension:
-
-```csharp
-services.AddDataServices(configuration);
-```
-
-It registers:
-
-- database
-- repositories
-- unit of work
-
-## API Layer
-
-Currently mostly default scaffold.
-
-Program.cs currently has:
-
-- controllers
-- OpenAPI
-- Application services
-- Data services
-- Identity services
-- authentication
-- HTTPS redirection
-- authorization
-
-Still needed:
-
-- permission service implementation
-
-## Infrastructure.Identity
-
-ASP.NET Core Identity has been introduced as a separate infrastructure project.
-
-Current design:
-
-- `ApplicationUser : IdentityUser<Guid>` is infrastructure-only.
-- Domain still uses `UserAccount` for business rules, access grants, ownership, comments, likes, admin/block flags.
-- Identity user and domain user share the same `Guid`.
-- External login provisioning creates/uses the Identity user, then `CompleteExternalLoginUseCase` creates/updates the matching `UserAccount`.
-- Google and Facebook authentication are wired only when config sections exist:
-  - `Authentication:Google:ClientId`
-  - `Authentication:Google:ClientSecret`
-  - `Authentication:Facebook:AppId`
-  - `Authentication:Facebook:AppSecret`
-- Names are intentionally provider-neutral (`ExternalUserInfo`, `IExternalIdentityService`) so Telegram bot auth can be added later as another external identity flow.
-
-Important classes:
-
-- `ApplicationIdentityDbContext`
-- `CurrentUser`
-- `ExternalIdentityService`
-- `AuthenticationSession`
-- `IdentityAccountService`
-- `IdentityRoles.Admin`
-
-Application identity use cases:
+Implemented identity/admin use cases:
 
 - `CompleteExternalLoginUseCase`
 - `GetCurrentUserProfileUseCase`
@@ -429,12 +178,186 @@ Application identity use cases:
 - `ChangeUserBlockStatusUseCase`
 - `DeleteUserUseCase`
 
-API identity endpoints:
+Read/query contracts:
+
+- `IInventoryQueries`
+- `IInventoryItemQueries`
+
+Common query DTOs:
+
+- `PageRequest`
+- `PagedResult<T>`
+- `AutocompleteOptionDto`
+
+Inventory query DTO namespace:
+
+- `Inventra.Application.Inventories.Queries.Dto`
+
+Item query DTO namespace:
+
+- `Inventra.Application.Items.Queries.Dto`
+
+## Infrastructure.Data
+
+Uses EF Core + PostgreSQL + snake_case naming.
+
+Main types:
+
+- `AppDbContext`
+- `AuditInterceptor`
+- command repositories in `Repositories`
+- read models/queries in `Queries`
+
+DI registration:
+
+- `AddDataServices(configuration)`
+- Registers database, repositories, query services, unit of work.
+
+Command repositories return tracked aggregates.
+
+Read queries are `AsNoTracking()`-oriented and live in partial classes:
+
+- `InventoryQueries.cs`
+- `InventoryQueries.Lists.cs`
+- `InventoryQueries.Details.cs`
+- `InventoryQueries.Tags.cs`
+- `InventoryQueries.Models.cs`
+- `InventoryItemQueries.cs`
+- `InventoryItemQueries.Table.cs`
+- `InventoryItemQueries.Details.cs`
+- `InventoryItemQueries.Statistics.cs`
+- `InventoryItemQueries.Models.cs`
+
+Important indexes/constraints:
+
+- unique item custom ID within inventory: `(inventory_id, custom_id)`
+- unique item sequence within inventory when sequence exists
+- unique item like: `(item_id, user_id)`
+- unique inventory access grant: `(inventory_id, user_id)`
+- unique inventory tag: `(inventory_id, tag_id)`
+- unique tag name
+- unique category name
+- unique domain user name/email
+
+Sequence generation:
+
+- `InventorySequenceProvider` uses PostgreSQL atomic upsert.
+- First issued sequence is `1`.
+- Gaps are acceptable if item saving fails after sequence reservation.
+
+Full-text search:
+
+- PostgreSQL FTS is used instead of `ILIKE`.
+- Inventory FTS uses `simple` configuration.
+- Migration `20260513200138_AddInventoryFullTextSearch` adds the GIN expression index.
+- Search ranks by `ts_rank` and falls back to recent updates/creation.
+
+Migrations currently present:
+
+- Data:
+  - `20260512180748_InitialCreate`
+  - `20260513200138_AddInventoryFullTextSearch`
+- Identity:
+  - `20260512181119_InitialIdentity`
+
+## Infrastructure.Identity
+
+Uses ASP.NET Core Identity with cookie auth.
+
+Main types:
+
+- `ApplicationUser : IdentityUser<Guid>`
+  - Currently empty but intentionally keeps a project-owned Identity user type.
+- `ApplicationIdentityDbContext`
+- `CurrentUser`
+- `ExternalIdentityService`
+- `AuthenticationSession`
+- `IdentityAccountService`
+- `IdentityRoles`
+
+Identity and domain users:
+
+- `ApplicationUser` is the Identity/auth user.
+- `UserAccount` is the domain/application user.
+- Both share the same `Guid`.
+- `CompleteExternalLoginUseCase` creates/updates `UserAccount` after external Identity login.
+
+Providers:
+
+- Google is configured when `Authentication:Google:ClientId` and `Authentication:Google:ClientSecret` exist.
+- GitHub is configured when `Authentication:GitHub:ClientId` and `Authentication:GitHub:ClientSecret` exist.
+- Facebook is not currently wired.
+
+External login flow:
+
+1. `GET /auth/external/{provider}`
+2. API validates provider scheme.
+3. API returns `Challenge(...)`.
+4. Provider returns to middleware callback:
+   - Google: `/signin-google`
+   - GitHub: `/signin-github`
+5. Middleware writes the temporary `Identity.External` cookie.
+6. Middleware redirects to app callback:
+   - `/auth/external-login/callback`
+7. `CompleteExternalLoginUseCase` calls `ExternalIdentityService.CompleteSignInAsync()`.
+8. `SignInManager.GetExternalLoginInfoAsync()` reads the external cookie.
+9. Existing/new `ApplicationUser` is signed in with the application cookie.
+10. Matching `UserAccount` is created/updated.
+
+Important fix already applied:
+
+- `AuthenticationProperties.Items["LoginProvider"] = provider` is set in `AuthController`.
+- Without this, the external cookie was valid, but `GetExternalLoginInfoAsync()` returned `null`.
+
+Known current Identity issue:
+
+- Duplicate email across providers is not handled yet.
+- Current behavior:
+  - Google creates user with real email.
+  - GitHub with the same email fails with `DuplicateEmail`.
+- Intended next fix:
+  - `FindByLogin(provider, providerKey)`.
+  - If missing, read email.
+  - `FindByEmail(email)`.
+  - If found, `AddLoginAsync(existingUser, loginInfo)` and sign in.
+  - If not found, create a new user and link login.
+- GitHub can provide fallback emails like `{ProviderKey}@GitHub.external` if email claim is missing.
+- GitHub email retrieval has been improved enough that the debugger showed a real `ClaimTypes.Email`, but verify the actual provider configuration before relying on it.
+
+Cookie/session policy:
+
+- JWT is not used.
+- Browser/API clients authenticate via ASP.NET Identity application cookie.
+- Cookie is HttpOnly and sent automatically by the browser/Insomnia for the same host.
+- Frontend should call `/auth/me` to learn current user state.
+- Redis-based session invalidation was discussed but intentionally deferred.
+
+## API Layer
+
+Program:
+
+- Controllers.
+- Application services.
+- Data services.
+- Identity services.
+- OpenAPI and Scalar in development.
+- `UseAuthentication()`.
+- `UseAuthorization()`.
+
+Base controller:
+
+- `ApiControllerBase`
+- Uses `ResultExtensions.Match(...)` / `FromResult(...)` to map application results.
+
+Current auth endpoints:
 
 - `GET /auth/external/{provider}`
-- `GET /auth/external/callback`
+- `GET /auth/external-login/callback`
 - `POST /auth/logout`
 - `GET /auth/me`
+
+Current admin endpoints:
+
 - `GET /admin/users`
 - `POST /admin/users/{userId}/block`
 - `POST /admin/users/{userId}/unblock`
@@ -442,135 +365,106 @@ API identity endpoints:
 - `DELETE /admin/users/{userId}/admin-role`
 - `DELETE /admin/users/{userId}`
 
-API helper:
+Current read endpoints:
 
-- `ApiControllerBase` maps `Result` / `Result<T>` to HTTP responses.
+- `GET /inventories/latest`
+- `GET /inventories/top`
+- `GET /inventories/search`
+- `GET /inventories/{inventoryId}`
+- `GET /inventories/owned/{ownerId}`
+- `GET /inventories/writable/{userId}`
+- `GET /inventories/{inventoryId}/statistics`
+- `GET /inventories/{inventoryId}/items`
+- `GET /items/{itemId}`
+- `GET /tags/cloud`
+- `GET /tags/autocomplete`
 
-Important behavior:
+Still missing API endpoints:
 
-- Admin role can be removed from any user, including the current user, matching the assignment requirement.
-- Blocked users are signed out after external login completion.
-- Blocking also sets Identity lockout.
-- Deleting a user removes both `UserAccount` and the Identity user.
+- Inventory write endpoints.
+- Inventory field write endpoints.
+- Inventory custom ID format write endpoints.
+- Access management write endpoints.
+- Item create/update/delete endpoints.
+- Like/unlike endpoints.
+- Discussion comments endpoints.
+- SignalR hub endpoint.
+- User preferences endpoints if theme/language are stored server-side.
 
-Still needed:
+## Local Development
 
-- Add migrations for both Data and Identity contexts, or decide whether to merge Identity into one migration flow.
+Docker Compose:
 
-## Local PostgreSQL / Docker Compose Plan
+- File: `compose.yaml`
+- Service: `postgres`
+- Image: `postgres:18.3`
+- Env values come from root `.env`.
+- Volume path must stay `/var/lib/postgresql` for this Postgres image/version.
 
-For local migrations/dev, use PostgreSQL in Docker Compose.
+Expected root `.env` shape:
 
-Suggested approach:
-
-- Add `docker-compose.yml` at repo root.
-- Run Postgres locally with exposed port.
-- Store local connection string in `Inventra.Api/appsettings.Development.json`.
-- For real deployment, only change `ConnectionStrings:DefaultConnection`.
-
-Example local connection string:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=inventra;Username=inventra;Password=inventra"
-  }
-}
+```env
+POSTGRES_DB=inventra
+POSTGRES_USER=inventra
+POSTGRES_PASSWORD=...
+POSTGRES_PORT=5432
 ```
 
-Recommended compose service:
+Development connection string currently exists in:
 
-```yaml
-services:
-  postgres:
-    image: postgres:17
-    container_name: inventra-postgres
-    environment:
-      POSTGRES_DB: inventra
-      POSTGRES_USER: inventra
-      POSTGRES_PASSWORD: inventra
-    ports:
-      - "5432:5432"
-    volumes:
-      - inventra-postgres-data:/var/lib/postgresql/data
+- `Inventra.Api/appsettings.Development.json`
 
-volumes:
-  inventra-postgres-data:
-```
+Secrets:
 
-Do not hardcode production connection strings.
+- `builder.Configuration.AddPortableSecrets()` is used in `Program.cs`.
+- Auth provider secrets may come from portable secrets/env.
+- Do not commit real provider secrets.
 
-## Migrations Plan
+## Current Backend Backlog
 
-Needed next:
+Highest priority:
 
-1. Add Docker Compose for local Postgres.
-2. Add local `DefaultConnection`.
-3. Wire `AddDataServices` in API `Program.cs`.
-4. Ensure EF tools are available:
+1. Fix external provider linking by email to avoid `DuplicateEmail`.
+2. Add write API controllers for existing use cases.
+3. Add comments backend:
+   - list comments
+   - add comment
+   - SignalR or near-real-time polling/hub updates
+4. Verify optimistic locking behavior and HTTP conflict mapping.
+5. Verify item custom ID duplicate conflicts map cleanly.
+6. Verify like uniqueness and error mapping.
 
-```powershell
-dotnet tool install --global dotnet-ef --version 10.0.7
-```
+Secondary:
 
-5. Create first migration from Data project with API as startup project:
+- Add endpoint/list for available external auth providers.
+- Decide whether theme/language are server-side user preferences or client-only.
+- Improve GitHub verified email handling later if needed.
+- Add richer logging only where it helps production diagnostics.
+- Review read queries with real data.
 
-```powershell
-dotnet ef migrations add InitialCreate `
-  --project Inventra.Infrastructure.Data `
-  --startup-project Inventra.Api `
-  --output-dir Migrations
-```
+Deferred:
 
-6. Apply migration:
+- Redis session invalidation/cache.
+- Cloud image uploader integration.
+- Document previews.
+- CSV/Excel export.
+- Form auth with email confirmation.
+- Optional arbitrary unlimited fields.
 
-```powershell
-dotnet ef database update `
-  --project Inventra.Infrastructure.Data `
-  --startup-project Inventra.Api
-```
+## Build Notes
 
-## Important Remaining Work
-
-Backend priorities:
-
-1. Add Docker Compose for local Postgres.
-2. Create initial migration and inspect generated schema carefully.
-3. Add auth/current-user/admin controllers.
-4. Implement `IInventoryPermissionService`.
-5. Add API controllers:
-   - inventories
-   - fields
-   - access settings
-   - id format
-   - items
-   - likes
-6. Add comments use cases/controllers.
-7. Add read-side queries:
-    - latest inventories
-    - top inventories
-    - inventory details
-    - items table
-    - user owned/writable inventories
-    - tag/user autocomplete
-    - search
-    - statistics
-
-Deadline note:
-
-- User has about 9-10 days from 2026-05-11.
-- Frontend is planned for the last couple of days.
-- Backend should be made runnable quickly now.
-
-## Build Commands
-
-Common build commands:
+Useful commands:
 
 ```powershell
 $env:DOTNET_CLI_HOME='M:\ItransitionTasks\Inventra\.dotnet'
 dotnet build Inventra.Application\Inventra.Application.csproj
 dotnet build Inventra.Infrastructure.Data\Inventra.Infrastructure.Data.csproj
+dotnet build Inventra.Infrastructure.Identity\Inventra.Infrastructure.Identity.csproj
 dotnet build Inventra.Api\Inventra.Api.csproj
 ```
 
-Sometimes sandbox blocks NuGet config/package restore. If build fails with an access or restore issue, rerun with elevated permissions.
+Known local issue:
+
+- `Inventra.Api` running under Visual Studio can lock DLLs and make `dotnet build Inventra.Api\Inventra.Api.csproj` fail at copy time.
+- Stop the running API before rebuilding the API project.
+- Sandbox may block reading user-level NuGet config; rerun build with elevated permission when needed.
