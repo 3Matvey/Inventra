@@ -219,11 +219,11 @@ public sealed class Inventory : AuditableEntity
         MarkChanged();
     }
 
-    public InventoryComment AddComment(Guid authorId, string bodyMarkdown, DateTimeOffset createdAt)
+    public InventoryComment AddComment(Guid authorId, string bodyMarkdown)
     {
         authorId = Guard.RequiredId(authorId);
 
-        var comment = new InventoryComment(Id, authorId, bodyMarkdown, createdAt);
+        var comment = new InventoryComment(Id, authorId, bodyMarkdown);
         _comments.Add(comment);
 
         return comment;

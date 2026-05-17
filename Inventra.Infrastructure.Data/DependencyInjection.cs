@@ -1,5 +1,6 @@
 using Inventra.Infrastructure.Data.Repositories;
 using Inventra.Infrastructure.Data.Queries;
+using Inventra.Application.Inventories.Comments;
 using Inventra.Application.Inventories.Queries;
 using Inventra.Application.Items.Queries;
 using Microsoft.Extensions.Configuration;
@@ -49,6 +50,7 @@ public static class DependencyInjection
 
         private IServiceCollection AddQueries()
         {
+            services.AddScoped<IInventoryCommentQueries, InventoryCommentQueries>();
             services.AddScoped<IInventoryQueries, InventoryQueries>();
             services.AddScoped<IInventoryItemQueries, InventoryItemQueries>();
 

@@ -1,4 +1,5 @@
 using Inventra.Api;
+using Inventra.Api.Hubs;
 using Inventra.Application;
 using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
@@ -11,6 +12,7 @@ var configuration = builder.Configuration;
 
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddApplicationServices()
     .AddDataServices(configuration)
     .AddIdentityServices(configuration);
@@ -31,5 +33,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<InventoryDiscussionHub>("/hubs/inventory-discussion");
 
 app.Run();
