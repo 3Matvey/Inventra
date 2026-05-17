@@ -39,10 +39,14 @@ internal partial class InventoryQueries
 
     private IQueryable<InventoryDetailsDto> InventoryDetailsBaseQuery(Guid inventoryId)
     {
+        var inventories = dbContext.Inventories.AsNoTracking();
+        var categories = dbContext.Categories.AsNoTracking();
+        var owners = dbContext.UserAccounts.AsNoTracking();
+
         return
-            from inventory in dbContext.Inventories.AsNoTracking()
-            join category in dbContext.Categories.AsNoTracking() on inventory.CategoryId equals category.Id
-            join owner in dbContext.UserAccounts.AsNoTracking() on inventory.OwnerId equals owner.Id
+            from inventory in inventories
+            join category in categories on inventory.CategoryId equals category.Id
+            join owner in owners on inventory.OwnerId equals owner.Id
             where inventory.Id == inventoryId
             select ToDetailsBase(inventory, category, owner);
     }
@@ -71,8 +75,9 @@ internal partial class InventoryQueries
         Guid inventoryId,
         CancellationToken cancellationToken)
     {
-        return await dbContext.InventoryFields
-            .AsNoTracking()
+        var fields = dbContext.InventoryFields.AsNoTracking();
+
+        return await fields
             .Where(x => x.InventoryId == inventoryId)
             .OrderBy(x => x.Order)
             .Select(x => ToFieldDefinition(x))
@@ -94,8 +99,9 @@ internal partial class InventoryQueries
         Guid inventoryId,
         CancellationToken cancellationToken)
     {
-        return await dbContext.InventoryIdFormatElements
-            .AsNoTracking()
+        var elements = dbContext.InventoryIdFormatElements.AsNoTracking();
+
+        return await elements
             .Where(x => x.InventoryId == inventoryId)
             .OrderBy(x => x.Order)
             .Select(x => ToIdFormatElement(x))
@@ -122,9 +128,12 @@ internal partial class InventoryQueries
 
     private IQueryable<InventoryAccessUserDto> AccessUsersQuery(Guid inventoryId)
     {
+        var accessGrants = dbContext.InventoryAccessGrants.AsNoTracking();
+        var users = dbContext.UserAccounts.AsNoTracking();
+
         return
-            from grant in dbContext.InventoryAccessGrants.AsNoTracking()
-            join user in dbContext.UserAccounts.AsNoTracking() on grant.UserId equals user.Id
+            from grant in accessGrants
+            join user in users on grant.UserId equals user.Id
             where grant.InventoryId == inventoryId
             orderby user.UserName
             select ToAccessUser(grant, user);

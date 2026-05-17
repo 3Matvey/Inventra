@@ -80,18 +80,23 @@ internal partial class InventoryQueries
 
     private IQueryable<Guid> WritableInventoryIdsQuery(Guid userId)
     {
-        return dbContext.InventoryAccessGrants
-            .AsNoTracking()
+        var accessGrants = dbContext.InventoryAccessGrants.AsNoTracking();
+
+        return accessGrants
             .Where(x => x.UserId == userId)
             .Select(x => x.InventoryId);
     }
 
     private IQueryable<InventoryRowBase> BaseInventoryRows()
     {
+        var inventories = dbContext.Inventories.AsNoTracking();
+        var categories = dbContext.Categories.AsNoTracking();
+        var owners = dbContext.UserAccounts.AsNoTracking();
+
         return
-            from inventory in dbContext.Inventories.AsNoTracking()
-            join category in dbContext.Categories.AsNoTracking() on inventory.CategoryId equals category.Id
-            join owner in dbContext.UserAccounts.AsNoTracking() on inventory.OwnerId equals owner.Id
+            from inventory in inventories
+            join category in categories on inventory.CategoryId equals category.Id
+            join owner in owners on inventory.OwnerId equals owner.Id
             select new InventoryRowBase
             {
                 Id = inventory.Id,

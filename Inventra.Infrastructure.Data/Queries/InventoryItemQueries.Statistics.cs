@@ -19,9 +19,9 @@ internal partial class InventoryItemQueries
         Guid inventoryId,
         CancellationToken cancellationToken)
     {
-        return await dbContext.Inventories
-            .AsNoTracking()
-            .AnyAsync(x => x.Id == inventoryId, cancellationToken);
+        var inventories = dbContext.Inventories.AsNoTracking();
+
+        return await inventories.AnyAsync(x => x.Id == inventoryId, cancellationToken);
     }
 
     private async Task<InventoryStatisticsDto> BuildStatisticsAsync(
@@ -39,9 +39,9 @@ internal partial class InventoryItemQueries
         Guid inventoryId,
         CancellationToken cancellationToken)
     {
-        return await dbContext.InventoryItems
-            .AsNoTracking()
-            .CountAsync(x => x.InventoryId == inventoryId, cancellationToken);
+        var items = dbContext.InventoryItems.AsNoTracking();
+
+        return await items.CountAsync(x => x.InventoryId == inventoryId, cancellationToken);
     }
 
     private async Task<IReadOnlyCollection<NumericFieldStatisticsDto>> GetNumericStatisticsAsync(
@@ -53,9 +53,12 @@ internal partial class InventoryItemQueries
 
     private IQueryable<NumericFieldStatisticsDto> NumericStatisticsQuery(Guid inventoryId)
     {
+        var fields = dbContext.InventoryFields.AsNoTracking();
+        var values = dbContext.ItemFieldValues.AsNoTracking();
+
         return
-            from field in dbContext.InventoryFields.AsNoTracking()
-            join value in dbContext.ItemFieldValues.AsNoTracking() on field.Id equals value.FieldId
+            from field in fields
+            join value in values on field.Id equals value.FieldId
             where field.InventoryId == inventoryId
             where field.Type == InventoryFieldType.Number
             where value.NumberValue != null
@@ -78,20 +81,20 @@ internal partial class InventoryItemQueries
         return ToStringStatistics(frequencies);
     }
 
-    private static IReadOnlyCollection<StringFieldStatisticsDto> ToStringStatistics(
+    private static StringFieldStatisticsDto[] ToStringStatistics(
         IEnumerable<StringFrequencyRow> frequencies)
     {
         return frequencies
             .GroupBy(x => new { x.FieldId, x.FieldTitle })
-            .Select(x => new StringFieldStatisticsDto(
-                x.Key.FieldId,
-                x.Key.FieldTitle,
-                MostFrequentValues(x)))
-            .OrderBy(x => x.FieldTitle)
+            .Select(group => new StringFieldStatisticsDto(
+                group.Key.FieldId,
+                group.Key.FieldTitle,
+                MostFrequentValues(group)))
+            .OrderBy(statistics => statistics.FieldTitle)
             .ToArray();
     }
 
-    private static IReadOnlyCollection<StringFieldFrequencyDto> MostFrequentValues(
+    private static StringFieldFrequencyDto[] MostFrequentValues(
         IEnumerable<StringFrequencyRow> values)
     {
         return values
@@ -111,9 +114,12 @@ internal partial class InventoryItemQueries
 
     private IQueryable<StringFrequencyRow> StringFrequenciesQuery(Guid inventoryId)
     {
+        var fields = dbContext.InventoryFields.AsNoTracking();
+        var values = dbContext.ItemFieldValues.AsNoTracking();
+
         return
-            from field in dbContext.InventoryFields.AsNoTracking()
-            join value in dbContext.ItemFieldValues.AsNoTracking() on field.Id equals value.FieldId
+            from field in fields
+            join value in values on field.Id equals value.FieldId
             where field.InventoryId == inventoryId
             where field.Type == InventoryFieldType.SingleLineText
                 || field.Type == InventoryFieldType.MultiLineText

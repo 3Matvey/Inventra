@@ -25,25 +25,28 @@ internal class InventoryCommentQueries(AppDbContext dbContext) : IInventoryComme
         Guid inventoryId,
         CancellationToken cancellationToken)
     {
-        return dbContext.Inventories
-            .AsNoTracking()
-            .AnyAsync(x => x.Id == inventoryId, cancellationToken);
+        var inventories = dbContext.Inventories.AsNoTracking();
+
+        return inventories.AnyAsync(x => x.Id == inventoryId, cancellationToken);
     }
 
     private IQueryable<InventoryCommentDto> CommentRows(Guid inventoryId)
     {
-        return from comment in dbContext.InventoryComments.AsNoTracking() //TODO вынести AsNoTracking из запроса
-               join author in dbContext.UserAccounts.AsNoTracking()
-                on comment.AuthorId equals author.Id
-            where comment.InventoryId == inventoryId
-            orderby comment.CreatedAt, comment.Id
-            select new InventoryCommentDto(
-                comment.Id,
-                comment.InventoryId,
-                comment.AuthorId,
-                author.UserName,
-                comment.BodyMarkdown,
-                comment.CreatedAt);
+        var comments = dbContext.InventoryComments.AsNoTracking();
+        var authors = dbContext.UserAccounts.AsNoTracking();
+
+        return from comment in comments
+               join author in authors
+                 on comment.AuthorId equals author.Id
+               where comment.InventoryId == inventoryId
+               orderby comment.CreatedAt, comment.Id
+               select new InventoryCommentDto(
+                    comment.Id,
+                    comment.InventoryId,
+                    comment.AuthorId,
+                    author.UserName,
+                    comment.BodyMarkdown,
+                    comment.CreatedAt);
     }
 
     private static IQueryable<InventoryCommentDto> PageRows(

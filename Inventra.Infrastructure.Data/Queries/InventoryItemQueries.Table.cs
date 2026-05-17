@@ -41,9 +41,12 @@ internal partial class InventoryItemQueries
 
     private IQueryable<ItemRowBase> BaseItemRowsQuery(Guid? inventoryId, Guid? currentUserId)
     {
+        var items = dbContext.InventoryItems.AsNoTracking();
+        var creators = dbContext.UserAccounts.AsNoTracking();
+
         return
-            from item in dbContext.InventoryItems.AsNoTracking()
-            join creator in dbContext.UserAccounts.AsNoTracking() on item.CreatedById equals creator.Id
+            from item in items
+            join creator in creators on item.CreatedById equals creator.Id
             where inventoryId == null || item.InventoryId == inventoryId
             select new ItemRowBase
             {
@@ -152,9 +155,12 @@ internal partial class InventoryItemQueries
         IReadOnlyCollection<Guid> itemIds,
         bool onlyTableFields)
     {
+        var values = dbContext.ItemFieldValues.AsNoTracking();
+        var fields = dbContext.InventoryFields.AsNoTracking();
+
         return
-            from value in dbContext.ItemFieldValues.AsNoTracking()
-            join field in dbContext.InventoryFields.AsNoTracking() on value.FieldId equals field.Id
+            from value in values
+            join field in fields on value.FieldId equals field.Id
             where itemIds.Contains(value.ItemId)
             where !onlyTableFields || field.ShowInTable
             orderby field.Order

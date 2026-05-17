@@ -26,9 +26,12 @@ internal partial class InventoryQueries
 
     private IQueryable<TagCloudItemDto> TagCloudQuery()
     {
+        var inventoryTags = dbContext.InventoryTags.AsNoTracking();
+        var tags = dbContext.Tags.AsNoTracking();
+
         return
-            from inventoryTag in dbContext.InventoryTags.AsNoTracking()
-            join tag in dbContext.Tags.AsNoTracking() on inventoryTag.TagId equals tag.Id
+            from inventoryTag in inventoryTags
+            join tag in tags on inventoryTag.TagId equals tag.Id
             group inventoryTag by new { tag.Id, tag.Name } into tagGroup
             orderby tagGroup.Count() descending, tagGroup.Key.Name
             select ToTagCloudItem(tagGroup.Key.Id, tagGroup.Key.Name, tagGroup.Count());
@@ -42,9 +45,9 @@ internal partial class InventoryQueries
     private IQueryable<AutocompleteOptionDto> TagAutocompleteQuery(string term)
     {
         var pattern = term.Trim() + "%";
+        var tags = dbContext.Tags.AsNoTracking();
 
-        return dbContext.Tags
-            .AsNoTracking()
+        return tags
             .Where(x => EF.Functions.ILike(x.Name, pattern))
             .OrderBy(x => x.Name)
             .Select(x => new AutocompleteOptionDto(x.Id, x.Name));
@@ -70,9 +73,12 @@ internal partial class InventoryQueries
 
     private IQueryable<InventoryTagRow> GetTagsQuery(IReadOnlyCollection<Guid> inventoryIds)
     {
+        var inventoryTags = dbContext.InventoryTags.AsNoTracking();
+        var tags = dbContext.Tags.AsNoTracking();
+
         return
-            from inventoryTag in dbContext.InventoryTags.AsNoTracking()
-            join tag in dbContext.Tags.AsNoTracking() on inventoryTag.TagId equals tag.Id
+            from inventoryTag in inventoryTags
+            join tag in tags on inventoryTag.TagId equals tag.Id
             where inventoryIds.Contains(inventoryTag.InventoryId)
             orderby tag.Name
             select new InventoryTagRow
