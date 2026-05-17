@@ -10,10 +10,9 @@ public sealed class RemoveInventoryIdFormatElementUseCase(
         RemoveInventoryIdFormatElementRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
-            inventoryRepository,
-            currentUser,
+        var inventoryResult = await inventoryRepository.LoadWithManageAccessAndVersionAsync(currentUser,
             request.InventoryId,
+            request.ExpectedVersion,
             cancellationToken);
 
         return inventoryResult.IsSuccess

@@ -41,10 +41,11 @@ public class InventoryFieldsController : ApiControllerBase
     public async Task<IActionResult> RemoveField(
         Guid inventoryId,
         Guid fieldId,
+        [FromQuery] long expectedVersion,
         [FromServices] RemoveInventoryFieldUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new RemoveInventoryFieldRequest(inventoryId, fieldId);
+        var request = new RemoveInventoryFieldRequest(inventoryId, expectedVersion, fieldId);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);
@@ -57,7 +58,10 @@ public class InventoryFieldsController : ApiControllerBase
         [FromServices] ReorderInventoryFieldsUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new ReorderInventoryFieldsRequest(inventoryId, body.OrderedFieldIds);
+        var request = new ReorderInventoryFieldsRequest(
+            inventoryId,
+            body.ExpectedVersion,
+            body.OrderedFieldIds);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);

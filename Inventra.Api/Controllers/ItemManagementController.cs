@@ -26,10 +26,11 @@ public class ItemManagementController : ApiControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteItem(
         Guid itemId,
+        [FromQuery] long expectedVersion,
         [FromServices] DeleteInventoryItemUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new DeleteInventoryItemRequest(itemId);
+        var request = new DeleteInventoryItemRequest(itemId, expectedVersion);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);

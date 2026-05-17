@@ -42,7 +42,10 @@ public class InventoryManagementController : ApiControllerBase
         [FromServices] SetPublicWriteAccessUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new SetPublicWriteAccessRequest(inventoryId, body.IsPublic);
+        var request = new SetPublicWriteAccessRequest(
+            inventoryId,
+            body.ExpectedVersion,
+            body.IsPublic);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);
@@ -55,7 +58,10 @@ public class InventoryManagementController : ApiControllerBase
         [FromServices] GrantInventoryAccessUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new GrantInventoryAccessRequest(inventoryId, body.UserNameOrEmail);
+        var request = new GrantInventoryAccessRequest(
+            inventoryId,
+            body.ExpectedVersion,
+            body.UserNameOrEmail);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);
@@ -65,10 +71,11 @@ public class InventoryManagementController : ApiControllerBase
     public async Task<IActionResult> RevokeAccess(
         Guid inventoryId,
         Guid userId,
+        [FromQuery] long expectedVersion,
         [FromServices] RevokeInventoryAccessUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new RevokeInventoryAccessRequest(inventoryId, userId);
+        var request = new RevokeInventoryAccessRequest(inventoryId, expectedVersion, userId);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);

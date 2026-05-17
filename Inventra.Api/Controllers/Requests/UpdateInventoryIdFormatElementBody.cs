@@ -3,6 +3,7 @@ using Inventra.Application.Inventories.UpdateInventoryIdFormatElement;
 namespace Inventra.Api.Controllers.Requests;
 
 public sealed record UpdateInventoryIdFormatElementBody(
+    long ExpectedVersion,
     string? Value,
     string? Format)
 {
@@ -12,6 +13,7 @@ public sealed record UpdateInventoryIdFormatElementBody(
     {
         return new UpdateInventoryIdFormatElementRequest(
             inventoryId,
+            ExpectedVersion,
             elementId,
             Value,
             Format);

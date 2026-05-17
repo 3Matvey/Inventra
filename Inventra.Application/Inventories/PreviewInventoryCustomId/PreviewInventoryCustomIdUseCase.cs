@@ -12,9 +12,7 @@ public sealed class PreviewInventoryCustomIdUseCase(
         PreviewInventoryCustomIdRequest request,
         CancellationToken cancellationToken = default)
     {
-        var inventoryResult = await InventoryAccess.LoadWithManageAccessAsync(
-            inventoryRepository,
-            currentUser,
+        var inventoryResult = await inventoryRepository.LoadWithManageAccessAsync(currentUser,
             request.InventoryId,
             cancellationToken);
 

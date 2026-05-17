@@ -22,6 +22,11 @@ public static class ItemErrors
             "Item.AccessDenied",
             "You do not have permission to modify items in this inventory.");
 
+    public static Error ConcurrencyConflict(Guid itemId) =>
+        Error.Conflict(
+            "Item.ConcurrencyConflict",
+            $"Inventory item '{itemId}' was modified by another user. Reload it and try again.");
+
     public static Error FieldNotFound(Guid fieldId) =>
         Error.BadRequest(
             "Item.FieldNotFound",

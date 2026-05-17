@@ -4,6 +4,7 @@ using Inventra.Domain.Enums;
 namespace Inventra.Api.Controllers.Requests;
 
 public sealed record AddInventoryIdFormatElementBody(
+    long ExpectedVersion,
     InventoryIdElementType Type,
     string? Value,
     string? Format)
@@ -12,6 +13,7 @@ public sealed record AddInventoryIdFormatElementBody(
     {
         return new AddInventoryIdFormatElementRequest(
             inventoryId,
+            ExpectedVersion,
             Type,
             Value,
             Format);

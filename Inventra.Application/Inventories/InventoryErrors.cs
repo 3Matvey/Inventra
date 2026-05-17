@@ -22,6 +22,11 @@ public static class InventoryErrors
             "Inventory.AccessDenied",
             "You do not have permission to manage this inventory.");
 
+    public static Error ConcurrencyConflict(Guid inventoryId) =>
+        Error.Conflict(
+            "Inventory.ConcurrencyConflict",
+            $"Inventory '{inventoryId}' was modified by another user. Reload it and try again.");
+
     public static Error FieldNotFound(Guid fieldId) =>
         Error.NotFound(
             "Inventory.FieldNotFound",

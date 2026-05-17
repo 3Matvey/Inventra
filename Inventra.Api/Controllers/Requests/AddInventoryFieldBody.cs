@@ -4,6 +4,7 @@ using Inventra.Domain.Enums;
 namespace Inventra.Api.Controllers.Requests;
 
 public sealed record AddInventoryFieldBody(
+    long ExpectedVersion,
     InventoryFieldType Type,
     string Title,
     string? Description,
@@ -13,6 +14,7 @@ public sealed record AddInventoryFieldBody(
     {
         return new AddInventoryFieldRequest(
             inventoryId,
+            ExpectedVersion,
             Type,
             Title,
             Description,

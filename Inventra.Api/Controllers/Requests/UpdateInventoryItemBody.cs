@@ -4,6 +4,7 @@ using Inventra.Application.Items.UpdateInventoryItem;
 namespace Inventra.Api.Controllers.Requests;
 
 public sealed record UpdateInventoryItemBody(
+    long ExpectedVersion,
     string CustomId,
     IReadOnlyCollection<ItemFieldValueRequest> FieldValues)
 {
@@ -11,6 +12,7 @@ public sealed record UpdateInventoryItemBody(
     {
         return new UpdateInventoryItemRequest(
             itemId,
+            ExpectedVersion,
             CustomId,
             FieldValues);
     }

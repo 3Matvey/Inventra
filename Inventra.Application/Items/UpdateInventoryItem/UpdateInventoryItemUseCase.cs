@@ -36,6 +36,11 @@ public sealed class UpdateInventoryItemUseCase(
         if (!InventoryPermissions.CanWriteItems(currentUser, inventory))
             return ItemErrors.AccessDenied();
 
+        var versionResult = ItemConcurrency.EnsureExpectedVersion(item, request.ExpectedVersion);
+
+        if (!versionResult.IsSuccess)
+            return versionResult;
+
         var result = UpdateValues(request, inventory, item);
 
         if (!result.IsSuccess)

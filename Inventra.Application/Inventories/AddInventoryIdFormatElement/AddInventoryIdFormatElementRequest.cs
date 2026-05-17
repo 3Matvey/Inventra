@@ -4,6 +4,7 @@ namespace Inventra.Application.Inventories.AddInventoryIdFormatElement;
 
 public sealed record AddInventoryIdFormatElementRequest(
     Guid InventoryId,
+    long ExpectedVersion,
     InventoryIdElementType Type,
     string? Value,
     string? Format);

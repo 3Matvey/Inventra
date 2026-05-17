@@ -1,3 +1,5 @@
 namespace Inventra.Api.Controllers.Requests;
 
-public sealed record ReorderInventoryIdFormatElementsBody(IReadOnlyList<Guid> OrderedElementIds);
+public sealed record ReorderInventoryIdFormatElementsBody(
+    long ExpectedVersion,
+    IReadOnlyList<Guid> OrderedElementIds);

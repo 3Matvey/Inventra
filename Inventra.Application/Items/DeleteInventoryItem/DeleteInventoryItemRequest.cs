@@ -1,3 +1,3 @@
 namespace Inventra.Application.Items.DeleteInventoryItem;
 
-public sealed record DeleteInventoryItemRequest(Guid ItemId);
+public sealed record DeleteInventoryItemRequest(Guid ItemId, long ExpectedVersion);

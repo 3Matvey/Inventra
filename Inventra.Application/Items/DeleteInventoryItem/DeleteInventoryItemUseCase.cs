@@ -23,16 +23,22 @@ public sealed class DeleteInventoryItemUseCase(
         if (inventory is null)
             return ItemErrors.InventoryNotFound(item.InventoryId);
 
-        return await DeleteAsync(inventory, item, cancellationToken);
+        return await DeleteAsync(request, inventory, item, cancellationToken);
     }
 
     private async Task<Result> DeleteAsync(
+        DeleteInventoryItemRequest request,
         Inventory inventory,
         InventoryItem item,
         CancellationToken cancellationToken)
     {
         if (!InventoryPermissions.CanWriteItems(currentUser, inventory))
             return ItemErrors.AccessDenied();
+
+        var versionResult = ItemConcurrency.EnsureExpectedVersion(item, request.ExpectedVersion);
+
+        if (!versionResult.IsSuccess)
+            return versionResult;
 
         itemRepository.Remove(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);

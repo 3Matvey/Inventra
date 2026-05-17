@@ -1,5 +1,6 @@
 using Inventra.Api;
 using Inventra.Api.Hubs;
+using Inventra.Api.Middleware;
 using Inventra.Application;
 using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
@@ -26,6 +27,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

@@ -42,10 +42,14 @@ public class InventoryIdFormatController : ApiControllerBase
     public async Task<IActionResult> RemoveElement(
         Guid inventoryId,
         Guid elementId,
+        [FromQuery] long expectedVersion,
         [FromServices] RemoveInventoryIdFormatElementUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new RemoveInventoryIdFormatElementRequest(inventoryId, elementId);
+        var request = new RemoveInventoryIdFormatElementRequest(
+            inventoryId,
+            expectedVersion,
+            elementId);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);
@@ -58,7 +62,10 @@ public class InventoryIdFormatController : ApiControllerBase
         [FromServices] ReorderInventoryIdFormatElementsUseCase useCase,
         CancellationToken cancellationToken)
     {
-        var request = new ReorderInventoryIdFormatElementsRequest(inventoryId, body.OrderedElementIds);
+        var request = new ReorderInventoryIdFormatElementsRequest(
+            inventoryId,
+            body.ExpectedVersion,
+            body.OrderedElementIds);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);

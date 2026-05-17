@@ -1,3 +1,3 @@
 namespace Inventra.Api.Controllers.Requests;
 
-public sealed record SetPublicWriteAccessBody(bool IsPublic);
+public sealed record SetPublicWriteAccessBody(long ExpectedVersion, bool IsPublic);
