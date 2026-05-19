@@ -13,6 +13,12 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Inventra.Api/Inventra.Api.csproj", "Inventra.Api/"]
+COPY ["Inventra.Application/Inventra.Application.csproj", "Inventra.Application/"]
+COPY ["Inventra.Domain/Inventra.Domain.csproj", "Inventra.Domain/"]
+COPY ["Inventra.Infrastructure.Caching/Inventra.Infrastructure.Caching.csproj", "Inventra.Infrastructure.Caching/"]
+COPY ["Inventra.Infrastructure.Cloudinary/Inventra.Infrastructure.Cloudinary.csproj", "Inventra.Infrastructure.Cloudinary/"]
+COPY ["Inventra.Infrastructure.Data/Inventra.Infrastructure.Data.csproj", "Inventra.Infrastructure.Data/"]
+COPY ["Inventra.Infrastructure.Identity/Inventra.Infrastructure.Identity.csproj", "Inventra.Infrastructure.Identity/"]
 RUN dotnet restore "./Inventra.Api/Inventra.Api.csproj"
 COPY . .
 WORKDIR "/src/Inventra.Api"

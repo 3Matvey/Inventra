@@ -1,4 +1,32 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Inventra.Api/Dockerfile
+    container_name: inventra-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Redis__ConnectionString: redis:6379
+      Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+      Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
+      Authentication__GitHub__ClientId: ${GITHUB_CLIENT_ID:?GITHUB_CLIENT_ID is required}
+      Authentication__GitHub__ClientSecret: ${GITHUB_CLIENT_SECRET:?GITHUB_CLIENT_SECRET is required}
+      Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME:?CLOUDINARY_CLOUD_NAME is required}
+      Cloudinary__ApiKey: ${CLOUDINARY_API_KEY:?CLOUDINARY_API_KEY is required}
+      Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET:?CLOUDINARY_API_SECRET is required}
+      Cloudinary__UploadFolder: ${CLOUDINARY_UPLOAD_FOLDER:-inventra}
+      Cloudinary__MaxImageSizeBytes: ${CLOUDINARY_MAX_IMAGE_SIZE_BYTES:-5242880}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   postgres:
     image: postgres:18.3
     container_name: inventra-postgres
@@ -17,6 +45,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:8.6.3-alpine
+    container_name: inventra-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - inventra-redis-data:/data
+
 volumes:
   inventra-postgres-data:
-  
+  inventra-redis-data:
