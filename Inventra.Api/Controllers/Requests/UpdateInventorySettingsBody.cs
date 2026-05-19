@@ -7,7 +7,8 @@ public sealed record UpdateInventorySettingsBody(
     Guid CategoryId,
     string Title,
     string? DescriptionMarkdown,
-    string? ImageUrl)
+    string? ImageUrl,
+    string? ImagePublicId)
 {
     public UpdateInventorySettingsRequest ToRequest(Guid inventoryId)
     {
@@ -17,6 +18,7 @@ public sealed record UpdateInventorySettingsBody(
             CategoryId,
             Title,
             DescriptionMarkdown,
-            ImageUrl);
+            ImageUrl,
+            ImagePublicId);
     }
 }

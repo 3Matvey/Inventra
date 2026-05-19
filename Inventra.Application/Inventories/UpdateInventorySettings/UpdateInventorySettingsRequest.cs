@@ -6,4 +6,5 @@ public sealed record UpdateInventorySettingsRequest(
     Guid CategoryId,
     string Title,
     string? DescriptionMarkdown,
-    string? ImageUrl);
+    string? ImageUrl,
+    string? ImagePublicId);

@@ -11,6 +11,7 @@ internal class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         builder.Property(x => x.Title).HasMaxLength(200).IsRequired();
         builder.Property(x => x.DescriptionMarkdown).HasColumnType("text");
         builder.Property(x => x.ImageUrl).HasMaxLength(2048);
+        builder.Property(x => x.ImagePublicId).HasMaxLength(255);
         builder.Property(x => x.Version).IsConcurrencyToken();
 
         builder.HasIndex(x => new { x.Title, x.DescriptionMarkdown })

@@ -5,4 +5,5 @@ public sealed record CreateInventoryRequest(
     string Title,
     string? DescriptionMarkdown,
     string? ImageUrl,
+    string? ImagePublicId,
     IReadOnlyCollection<string> Tags);

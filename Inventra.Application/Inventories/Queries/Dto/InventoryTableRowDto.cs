@@ -8,6 +8,7 @@ public sealed record InventoryTableRowDto(
     string Title,
     string? DescriptionMarkdown,
     string? ImageUrl,
+    string? ImagePublicId,
     string CategoryName,
     Guid OwnerId,
     string OwnerName,

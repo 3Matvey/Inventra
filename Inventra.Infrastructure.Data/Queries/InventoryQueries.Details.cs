@@ -61,6 +61,7 @@ internal partial class InventoryQueries
             inventory.Title,
             inventory.DescriptionMarkdown,
             inventory.ImageUrl,
+            inventory.ImagePublicId,
             new CategoryDto(category.Id, category.Name),
             new UserSummaryDto(owner.Id, owner.UserName),
             inventory.IsPublicWriteAccess,

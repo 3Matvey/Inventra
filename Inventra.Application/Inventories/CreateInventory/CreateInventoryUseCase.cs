@@ -36,7 +36,8 @@ public sealed class CreateInventoryUseCase(
             request.CategoryId,
             request.Title,
             request.DescriptionMarkdown,
-            request.ImageUrl);
+            request.ImageUrl,
+            request.ImagePublicId);
     }
 
     private async Task<IReadOnlyCollection<Tag>> ResolveTagsAsync(

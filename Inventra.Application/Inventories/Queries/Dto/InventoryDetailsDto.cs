@@ -8,6 +8,7 @@ public sealed record InventoryDetailsDto(
     string Title,
     string? DescriptionMarkdown,
     string? ImageUrl,
+    string? ImagePublicId,
     CategoryDto Category,
     UserSummaryDto Owner,
     bool IsPublicWriteAccess,

@@ -10,6 +10,7 @@ internal partial class InventoryQueries
         public string Title { get; init; } = string.Empty;
         public string? DescriptionMarkdown { get; init; }
         public string? ImageUrl { get; init; }
+        public string? ImagePublicId { get; init; }
         public Guid CategoryId { get; init; }
         public string CategoryName { get; init; } = string.Empty;
         public Guid OwnerId { get; init; }

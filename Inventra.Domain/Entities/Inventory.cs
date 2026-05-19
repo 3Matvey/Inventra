@@ -20,6 +20,7 @@ public sealed class Inventory : AuditableEntity
     public string Title { get; private set; } = string.Empty;
     public string? DescriptionMarkdown { get; private set; }
     public string? ImageUrl { get; private set; }
+    public string? ImagePublicId { get; private set; }
     public bool IsPublicWriteAccess { get; private set; }
     public long Version { get; private set; }
 
@@ -38,20 +39,22 @@ public sealed class Inventory : AuditableEntity
         Guid categoryId,
         string title,
         string? descriptionMarkdown,
-        string? imageUrl)
+        string? imageUrl,
+        string? imagePublicId)
     {
         OwnerId = Guard.RequiredId(ownerId);
         CategoryId = Guard.RequiredId(categoryId);
-        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, incrementVersion: false);
+        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, imagePublicId, false);
     }
 
     public void UpdateSettings(
         string title,
         string? descriptionMarkdown,
         Guid categoryId,
-        string? imageUrl)
+        string? imageUrl,
+        string? imagePublicId)
     {
-        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, incrementVersion: true);
+        SetSettings(title, descriptionMarkdown, categoryId, imageUrl, imagePublicId, true);
     }
 
     public void SetPublicWriteAccess(bool isPublic)
@@ -234,12 +237,14 @@ public sealed class Inventory : AuditableEntity
         string? descriptionMarkdown,
         Guid categoryId,
         string? imageUrl,
+        string? imagePublicId,
         bool incrementVersion)
     {
         Title = Guard.Required(title);
         CategoryId = Guard.RequiredId(categoryId);
         DescriptionMarkdown = Guard.Optional(descriptionMarkdown);
         ImageUrl = Guard.Optional(imageUrl);
+        ImagePublicId = Guard.Optional(imagePublicId);
 
         if (incrementVersion)
         {

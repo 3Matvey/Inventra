@@ -33,7 +33,8 @@ public sealed class UpdateInventorySettingsUseCase(
             request.Title,
             request.DescriptionMarkdown,
             request.CategoryId,
-            request.ImageUrl);
+            request.ImageUrl,
+            request.ImagePublicId);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

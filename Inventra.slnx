@@ -6,6 +6,7 @@
   <Project Path="Inventra.Api/Inventra.Api.csproj" />
   <Project Path="Inventra.Application/Inventra.Application.csproj" />
   <Project Path="Inventra.Domain/Inventra.Domain.csproj" />
+  <Project Path="Inventra.Infrastructure.Cloudinary/Inventra.Infrastructure.Cloudinary.csproj" Id="af1aeb32-eecb-4731-9ded-a7fd36bbe873" />
   <Project Path="Inventra.Infrastructure.Data/Inventra.Infrastructure.Data.csproj" Id="29e399d8-a9b7-46c9-9b66-85ec56cbeae9" />
   <Project Path="Inventra.Infrastructure.Identity/Inventra.Infrastructure.Identity.csproj" Id="e35115ab-39cf-4c6b-af3b-47f6e33d22e3" />
 </Solution>
