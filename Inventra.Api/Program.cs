@@ -5,6 +5,7 @@ using Inventra.Application;
 using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
 using Inventra.Infrastructure.Cloudinary;
+using Inventra.Infrastructure.Caching;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddSignalR();
 builder.Services.AddApplicationServices()
     .AddDataServices(configuration)
     .AddIdentityServices(configuration)
+    .AddCachingServices(configuration)
     .AddCloudinaryServices(configuration);
 
 builder.Services.AddOpenApi();

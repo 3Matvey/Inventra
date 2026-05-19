@@ -5,7 +5,8 @@ namespace Inventra.Infrastructure.Identity;
 
 internal class IdentityAccountService(
     UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole<Guid>> roleManager) : IIdentityAccountService
+    RoleManager<IdentityRole<Guid>> roleManager,
+    IBlockedUserSessionCache blockedUserSessionCache) : IIdentityAccountService
 {
     public async Task SetAdminRoleAsync(
         Guid userId,
@@ -40,6 +41,7 @@ internal class IdentityAccountService(
         user.LockoutEnd = isBlocked ? DateTimeOffset.MaxValue : null;
 
         await userManager.UpdateAsync(user);
+        await UpdateBlockedSessionCacheAsync(userId, isBlocked, cancellationToken);
     }
 
     public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -54,5 +56,16 @@ internal class IdentityAccountService(
     {
         if (!await roleManager.RoleExistsAsync(IdentityRoles.Admin))
             await roleManager.CreateAsync(new IdentityRole<Guid>(IdentityRoles.Admin));
+    }
+
+    private async Task UpdateBlockedSessionCacheAsync(
+        Guid userId,
+        bool isBlocked,
+        CancellationToken cancellationToken)
+    {
+        if (isBlocked)
+            await blockedUserSessionCache.MarkBlockedAsync(userId, cancellationToken);
+        else
+            await blockedUserSessionCache.MarkUnblockedAsync(userId, cancellationToken);
     }
 }

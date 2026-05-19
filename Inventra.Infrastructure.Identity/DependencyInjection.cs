@@ -61,11 +61,14 @@ public static class DependencyInjection
 
         private IServiceCollection ConfigureApplicationCookie()
         {
+            services.AddScoped<BlockedUserCookieEvents>();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/auth/login";
                 options.LogoutPath = "/auth/logout";
                 options.AccessDeniedPath = "/auth/access-denied";
+                options.EventsType = typeof(BlockedUserCookieEvents);
             });
 
             return services;
