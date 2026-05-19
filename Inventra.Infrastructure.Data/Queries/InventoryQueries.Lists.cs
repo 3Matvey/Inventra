@@ -131,13 +131,13 @@ internal partial class InventoryQueries
         if (string.IsNullOrWhiteSpace(term))
             return rows;
 
-        var tsQuery = EF.Functions.PlainToTsQuery("simple", term.Trim());
+        var normalizedTerm = term.Trim();
 
         return rows.Where(x =>
             EF.Functions.ToTsVector(
                 "simple",
                 x.Title + " " + (x.DescriptionMarkdown ?? string.Empty))
-            .Matches(tsQuery));
+            .Matches(EF.Functions.PlainToTsQuery("simple", normalizedTerm)));
     }
 
     private static IQueryable<InventoryRowBase> ApplySearchSorting(
@@ -147,13 +147,13 @@ internal partial class InventoryQueries
         if (string.IsNullOrWhiteSpace(term))
             return rows.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt);
 
-        var tsQuery = EF.Functions.PlainToTsQuery("simple", term.Trim());
+        var normalizedTerm = term.Trim();
 
         return rows
             .OrderByDescending(x => EF.Functions.ToTsVector(
                     "simple",
                     x.Title + " " + (x.DescriptionMarkdown ?? string.Empty))
-                .Rank(tsQuery))
+                .Rank(EF.Functions.PlainToTsQuery("simple", normalizedTerm)))
             .ThenByDescending(x => x.UpdatedAt ?? x.CreatedAt);
     }
 

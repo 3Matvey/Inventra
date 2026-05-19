@@ -13,7 +13,7 @@ internal sealed class BlockedUserCookieEvents(
         var userId = GetUserId(context.Principal);
 
         if (userId is null)
-            return; //TODO подумать кто будет решать логаут
+            return;
 
         if (!await blockedUsers.IsBlockedAsync(userId.Value, context.HttpContext.RequestAborted))
             return;
