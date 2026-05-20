@@ -1,17 +1,4 @@
 services:
-  ngrok:
-    image: ngrok/ngrok:latest
-    container_name: inventra-ngrok
-    restart: unless-stopped
-    environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?NGROK_AUTHTOKEN is required}
-    command: ["http", "http://api:8080", "--url=${NGROK_DOMAIN}"]
-    ports:
-      - "127.0.0.1:${NGROK_WEB_PORT:-4040}:4040"
-    depends_on:
-      api:
-        condition: service_started
-        
   api:
     build:
       context: .
