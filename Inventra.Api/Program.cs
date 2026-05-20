@@ -10,7 +10,6 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddPortableSecrets();
 var configuration = builder.Configuration;
 
 
