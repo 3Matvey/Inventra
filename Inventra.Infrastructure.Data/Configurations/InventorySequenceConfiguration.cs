@@ -8,5 +8,6 @@ internal class InventorySequenceConfiguration : IEntityTypeConfiguration<Invento
     {
         builder.HasKey(x => x.InventoryId);
         builder.Property(x => x.NextValue).IsRequired();
+        builder.HasOne<Inventory>().WithOne().HasForeignKey<InventorySequence>(x => x.InventoryId);
     }
 }

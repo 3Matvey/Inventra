@@ -9,6 +9,15 @@ internal class TagRepository(AppDbContext dbContext) : ITagRepository
         return dbContext.Tags.FirstOrDefaultAsync(x => x.Name == name, cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<Tag>> GetByNamesAsync(
+        IReadOnlyCollection<string> names,
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Tags
+            .Where(x => names.Contains(x.Name))
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<Tag>> GetByIdsAsync(
         IReadOnlyCollection<Guid> ids,
         CancellationToken cancellationToken = default)

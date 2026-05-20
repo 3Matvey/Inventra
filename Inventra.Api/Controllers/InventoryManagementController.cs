@@ -1,8 +1,10 @@
 using Inventra.Application.Inventories.CreateInventory;
+using Inventra.Application.Inventories.DeleteInventory;
 using Inventra.Application.Inventories.GrantInventoryAccess;
 using Inventra.Application.Inventories.RevokeInventoryAccess;
 using Inventra.Application.Inventories.SetPublicWriteAccess;
 using Inventra.Application.Inventories.UpdateInventorySettings;
+using Inventra.Application.Inventories.UpdateInventoryTags;
 using Inventra.Api.Controllers.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +32,33 @@ public class InventoryManagementController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var request = body.ToRequest(inventoryId);
+        var result = await useCase.ExecuteAsync(request, cancellationToken);
+
+        return FromResult(result);
+    }
+
+    [HttpPut("{inventoryId:guid}/tags")]
+    public async Task<IActionResult> UpdateTags(
+        Guid inventoryId,
+        [FromBody] UpdateInventoryTagsBody body,
+        [FromServices] UpdateInventoryTagsUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(
+            body.ToRequest(inventoryId),
+            cancellationToken);
+
+        return FromResult(result);
+    }
+
+    [HttpDelete("{inventoryId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid inventoryId,
+        [FromQuery] long expectedVersion,
+        [FromServices] DeleteInventoryUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var request = new DeleteInventoryRequest(inventoryId, expectedVersion);
         var result = await useCase.ExecuteAsync(request, cancellationToken);
 
         return FromResult(result);

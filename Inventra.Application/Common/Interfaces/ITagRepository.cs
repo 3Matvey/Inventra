@@ -4,6 +4,10 @@ public interface ITagRepository
 {
     Task<Tag?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Tag>> GetByNamesAsync(
+        IReadOnlyCollection<string> names,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<Tag>> GetByIdsAsync(
         IReadOnlyCollection<Guid> ids,
         CancellationToken cancellationToken = default);

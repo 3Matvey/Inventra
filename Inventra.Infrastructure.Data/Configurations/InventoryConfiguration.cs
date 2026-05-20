@@ -23,6 +23,7 @@ internal class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         builder.HasMany(x => x.IdFormatElements).WithOne().HasForeignKey(x => x.InventoryId);
         builder.HasMany(x => x.Tags).WithOne().HasForeignKey(x => x.InventoryId);
         builder.HasMany(x => x.Comments).WithOne().HasForeignKey(x => x.InventoryId);
+        builder.HasMany<InventoryItem>().WithOne().HasForeignKey(x => x.InventoryId);
 
         builder.Navigation(x => x.Fields).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(x => x.AccessGrants).UsePropertyAccessMode(PropertyAccessMode.Field);
