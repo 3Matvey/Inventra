@@ -10,8 +10,8 @@ services:
       ASPNETCORE_HTTP_PORTS: 8080
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       OpenApi__Enabled: "true"
-      #Kestrel__Certificates__Default__Path: /https/inventra.pfx
-      #Kestrel__Certificates__Default__Password: ${KESTREL_CERT_PASSWORD}
+      Frontend__BaseUrl: ${FRONTEND_BASE_URL:?FRONTEND_BASE_URL is required}
+      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:?FRONTEND_ORIGIN is required}
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Redis__ConnectionString: redis:6379
       Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
@@ -25,10 +25,8 @@ services:
       Cloudinary__MaxImageSizeBytes: ${CLOUDINARY_MAX_IMAGE_SIZE_BYTES:-5242880}
     ports:
       - "${API_PORT:-8080}:8080"
-      #- "${API_HTTPS_PORT:-8443}:8081"
     volumes:
       - inventra-dataprotection-keys:/home/app/.aspnet/DataProtection-Keys
-     # - ./certs/inventra.pfx:/https/inventra.pfx:ro
     depends_on:
       postgres:
         condition: service_healthy

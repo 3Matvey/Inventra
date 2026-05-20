@@ -15,6 +15,7 @@ var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+builder.Services.AddFrontendCors(configuration);
 builder.Services.AddApplicationServices()
     .AddDataServices(configuration)
     .AddIdentityServices(configuration)
@@ -34,6 +35,7 @@ if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("Ope
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+app.UseCors(CorsExtensions.FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();

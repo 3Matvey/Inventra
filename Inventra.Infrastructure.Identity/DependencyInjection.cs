@@ -1,6 +1,7 @@
 using Inventra.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +70,8 @@ public static class DependencyInjection
                 options.LogoutPath = "/auth/logout";
                 options.AccessDeniedPath = "/auth/access-denied";
                 options.EventsType = typeof(BlockedUserCookieEvents);
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
             return services;

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inventra.Api.Controllers;
 
 [Route("auth")]
-public class AuthController : ApiControllerBase
+public class AuthController(IConfiguration configuration) : ApiControllerBase
 {
     [HttpGet("external/{provider}")]
     public async Task<IActionResult> ExternalChallenge(
@@ -39,7 +39,7 @@ public class AuthController : ApiControllerBase
         var result = await useCase.ExecuteAsync(cancellationToken);
 
         return result.Match(
-            _ => LocalRedirect(returnUrl),
+            _ => Redirect(BuildFrontendRedirectUrl(returnUrl)),
             FromError);
     }
 
@@ -59,5 +59,13 @@ public class AuthController : ApiControllerBase
         var result = await useCase.ExecuteAsync(cancellationToken);
 
         return FromResult(result);
+    }
+
+    private string BuildFrontendRedirectUrl(string returnUrl)
+    {
+        var safeReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
+        var frontendBaseUrl = configuration["Frontend:BaseUrl"]!.TrimEnd('/');
+
+        return $"{frontendBaseUrl}/{safeReturnUrl.TrimStart('/')}";
     }
 }
