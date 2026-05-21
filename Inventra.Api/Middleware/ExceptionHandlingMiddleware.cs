@@ -17,6 +17,10 @@ public class ExceptionHandlingMiddleware(
         {
             var error = ExceptionMapper.Map(exception, environment);
             Log(exception, error);
+
+            if (context.Response.HasStarted)
+                return;
+
             await WriteAsync(context, error);
         }
     }
