@@ -2,6 +2,7 @@ using Inventra.Infrastructure.Data.Repositories;
 using Inventra.Infrastructure.Data.Queries;
 using Inventra.Application.Categories.Queries;
 using Inventra.Application.Inventories.Comments;
+using Inventra.Application.Inventories.Exports;
 using Inventra.Application.Inventories.Queries;
 using Inventra.Application.Items.Queries;
 using Inventra.Application.Users.Queries;
@@ -54,6 +55,7 @@ public static class DependencyInjection
         {
             services.AddScoped<ICategoryQueries, CategoryQueries>();
             services.AddScoped<IInventoryCommentQueries, InventoryCommentQueries>();
+            services.AddScoped<IInventoryExportQueries, InventoryExportQueries>();
             services.AddScoped<IInventoryQueries, InventoryQueries>();
             services.AddScoped<IInventoryItemQueries, InventoryItemQueries>();
             services.AddScoped<IUserQueries, UserQueries>();

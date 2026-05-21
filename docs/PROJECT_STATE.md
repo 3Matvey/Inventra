@@ -340,10 +340,12 @@ Read endpoints:
 
 - `GET /categories`
 - `GET /users/autocomplete`
+- `GET /health`
 - `GET /inventories/latest`
 - `GET /inventories/top`
 - `GET /inventories/search`
 - `GET /inventories/{inventoryId}`
+- `GET /inventories/{inventoryId}/export?format=csv|xlsx`
 - `GET /inventories/owned/{ownerId}`
 - `GET /inventories/writable/{userId}`
 - `GET /inventories/{inventoryId}/statistics`
@@ -356,6 +358,8 @@ Inventory write endpoints:
 
 - `POST /inventories`
 - `PUT /inventories/{inventoryId}/settings`
+- `PUT /inventories/{inventoryId}/tags`
+- `DELETE /inventories/{inventoryId}?expectedVersion={version}`
 - `PUT /inventories/{inventoryId}/public-access`
 - `POST /inventories/{inventoryId}/access-grants`
 - `DELETE /inventories/{inventoryId}/access-grants/{userId}?expectedVersion={version}`
@@ -437,18 +441,12 @@ Still worth doing:
 4. Decide language/theme persistence:
    - localStorage only, or
    - server-side user preferences.
-5. Decide image upload strategy:
-   - current backend supports `ImageUrl`,
-   - real cloud upload integration is not implemented.
-6. Consider global search scope beyond inventories if time allows.
+5. Consider global search scope beyond inventories if time allows.
 
 Deferred:
 
-- Redis session invalidation/cache.
 - Form auth with email confirmation.
-- Cloud uploader integration.
 - Document previews.
-- CSV/Excel export.
 - Optional arbitrary unlimited fields.
 - Verified GitHub email hardening.
 

@@ -6,6 +6,7 @@ using Inventra.Infrastructure.Data;
 using Inventra.Infrastructure.Identity;
 using Inventra.Infrastructure.Cloudinary;
 using Inventra.Infrastructure.Caching;
+using Inventra.Infrastructure.Export;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ builder.Services.AddApplicationServices()
     .AddDataServices(configuration)
     .AddIdentityServices(configuration)
     .AddCachingServices(configuration)
+    .AddExportServices()
     .AddCloudinaryServices(configuration);
 
 builder.Services.AddOpenApi();
