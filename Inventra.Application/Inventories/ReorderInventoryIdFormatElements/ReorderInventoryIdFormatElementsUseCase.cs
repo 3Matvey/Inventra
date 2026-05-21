@@ -28,6 +28,9 @@ public sealed class ReorderInventoryIdFormatElementsUseCase(
         if (!ContainsEveryElementOnce(inventory, request.OrderedElementIds))
             return InventoryErrors.InvalidIdElementOrder();
 
+        InventoryOrderReorder.MoveIdElementsToTemporaryOrders(inventory);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
         inventory.ReorderIdFormatElements(request.OrderedElementIds);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

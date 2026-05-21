@@ -28,6 +28,9 @@ public sealed class ReorderInventoryFieldsUseCase(
         if (!ContainsEveryFieldOnce(inventory, request.OrderedFieldIds))
             return InventoryErrors.InvalidFieldOrder();
 
+        InventoryOrderReorder.MoveFieldsToTemporaryOrders(inventory);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
         inventory.ReorderFields(request.OrderedFieldIds);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
