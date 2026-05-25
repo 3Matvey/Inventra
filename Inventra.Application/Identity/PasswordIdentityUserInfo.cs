@@ -6,4 +6,5 @@ namespace Inventra.Application.Identity;
 public sealed record PasswordIdentityUserInfo(
     Guid UserId,
     string UserName,
-    string Email);
+    string Email,
+    bool ShouldCreateUserAccount);

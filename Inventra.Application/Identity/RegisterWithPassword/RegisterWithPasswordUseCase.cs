@@ -15,8 +15,17 @@ public sealed class RegisterWithPasswordUseCase(
             cancellationToken);
 
         return result.IsSuccess
-            ? await CreateUserAccountAsync(result.Value, cancellationToken)
+            ? await CompleteRegistrationAsync(result.Value, cancellationToken)
             : result.Error;
+    }
+
+    private async Task<Result<Guid>> CompleteRegistrationAsync(
+        PasswordIdentityUserInfo identityUser,
+        CancellationToken cancellationToken)
+    {
+        return identityUser.ShouldCreateUserAccount
+            ? await CreateUserAccountAsync(identityUser, cancellationToken)
+            : identityUser.UserId;
     }
 
     private async Task<Result<Guid>> CreateUserAccountAsync(

@@ -8,6 +8,7 @@ using Inventra.Application.Identity.GetCurrentUserProfile;
 using Inventra.Application.Identity.LoginWithPassword;
 using Inventra.Application.Identity.RegisterWithPassword;
 using Inventra.Application.Identity.ResendEmailConfirmation;
+using Inventra.Application.Identity.SetPassword;
 using Inventra.Api.Controllers.Requests;
 using Inventra.Api.Controllers.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,17 @@ public class AuthController(IConfiguration configuration) : ApiControllerBase
     public async Task<IActionResult> ResendConfirmation(
         [FromBody] ResendEmailConfirmationBody body,
         [FromServices] ResendEmailConfirmationUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(body.ToRequest(), cancellationToken);
+
+        return FromResult(result);
+    }
+
+    [HttpPost("set-password")]
+    public async Task<IActionResult> SetPassword(
+        [FromBody] SetPasswordBody body,
+        [FromServices] SetPasswordUseCase useCase,
         CancellationToken cancellationToken)
     {
         var result = await useCase.ExecuteAsync(body.ToRequest(), cancellationToken);

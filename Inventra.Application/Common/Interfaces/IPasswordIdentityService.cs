@@ -23,4 +23,8 @@ public interface IPasswordIdentityService
     Task<Result> ResendConfirmationAsync(
         string email,
         CancellationToken cancellationToken = default);
+
+    Task<Result> SetPasswordAsync(
+        SetPasswordRequest request,
+        CancellationToken cancellationToken = default);
 }

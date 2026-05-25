@@ -32,6 +32,11 @@ public static class IdentityErrors
             "Identity.EmailConfirmationFailed",
             "E-mail confirmation could not be completed.");
 
+    public static Error SetPasswordFailed(string description) =>
+        Error.BadRequest(
+            "Identity.SetPasswordFailed",
+            description);
+
     public static Error RegistrationFailed(string description) =>
         Error.BadRequest(
             "Identity.RegistrationFailed",
