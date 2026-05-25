@@ -18,6 +18,9 @@ services:
       Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
       Authentication__GitHub__ClientId: ${GITHUB_CLIENT_ID:?GITHUB_CLIENT_ID is required}
       Authentication__GitHub__ClientSecret: ${GITHUB_CLIENT_SECRET:?GITHUB_CLIENT_SECRET is required}
+      Mail__Username: ${MAIL_USERNAME:?MAIL_USERNAME is required}
+      Mail__Password: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
+      Mail__FromEmail: ${MAIL_FROM_EMAIL:?MAIL_FROM_EMAIL is required}
       Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME:?CLOUDINARY_CLOUD_NAME is required}
       Cloudinary__ApiKey: ${CLOUDINARY_API_KEY:?CLOUDINARY_API_KEY is required}
       Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET:?CLOUDINARY_API_SECRET is required}

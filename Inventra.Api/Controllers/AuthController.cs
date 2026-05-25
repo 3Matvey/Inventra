@@ -1,9 +1,15 @@
 using Inventra.Application.Common.Interfaces;
 using Inventra.Application.Common.Results;
+using Inventra.Application.Identity.BeginExternalLogin;
+using Inventra.Application.Identity.ConfirmEmail;
 using Inventra.Application.Identity;
 using Inventra.Application.Identity.CompleteExternalLogin;
 using Inventra.Application.Identity.GetCurrentUserProfile;
-using Microsoft.AspNetCore.Authentication;
+using Inventra.Application.Identity.LoginWithPassword;
+using Inventra.Application.Identity.RegisterWithPassword;
+using Inventra.Application.Identity.ResendEmailConfirmation;
+using Inventra.Api.Controllers.Requests;
+using Inventra.Api.Controllers.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventra.Api.Controllers;
@@ -11,23 +17,67 @@ namespace Inventra.Api.Controllers;
 [Route("auth")]
 public class AuthController(IConfiguration configuration) : ApiControllerBase
 {
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterWithPasswordBody body,
+        [FromServices] RegisterWithPasswordUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(body.ToRequest(), cancellationToken);
+
+        return FromResult(result);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginWithPasswordBody body,
+        [FromServices] LoginWithPasswordUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(body.ToRequest(), cancellationToken);
+
+        return FromResult(result);
+    }
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(
+        [FromServices] ConfirmEmailUseCase useCase,
+        Guid userId,
+        string token,
+        string returnUrl = "/login?emailConfirmed=true",
+        CancellationToken cancellationToken = default)
+    {
+        var request = new ConfirmEmailRequest(userId, token);
+        var result = await useCase.ExecuteAsync(request, cancellationToken);
+
+        return result.Match(
+            () => Redirect(BuildFrontendRedirectUrl(returnUrl)),
+            FromError);
+    }
+
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendConfirmation(
+        [FromBody] ResendEmailConfirmationBody body,
+        [FromServices] ResendEmailConfirmationUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var result = await useCase.ExecuteAsync(body.ToRequest(), cancellationToken);
+
+        return FromResult(result);
+    }
+
     [HttpGet("external/{provider}")]
     public async Task<IActionResult> ExternalChallenge(
         string provider,
-        [FromServices] IAuthenticationSchemeProvider schemes,
+        [FromServices] BeginExternalLoginUseCase useCase,
         string returnUrl = "/")
     {
-        if (await schemes.GetSchemeAsync(provider) is null)
-            return BadRequest($"External authentication provider '{provider}' is not configured.");
+        var request = new BeginExternalLoginRequest(provider, returnUrl);
+        var result = await useCase.ExecuteAsync(request);
 
-        var redirectUrl = Url.Action(nameof(ExternalCallback), new { returnUrl });
-        var properties = new AuthenticationProperties
-        {
-            RedirectUri = redirectUrl,
-            Items = { ["LoginProvider"] = provider }
-        };
-
-        return Challenge(properties, provider);
+        return result.Match(
+            challenge => Challenge(challenge.ToAuthenticationProperties(), challenge.Provider),
+            FromError);
     }
 
     [HttpGet("external-login/callback")]

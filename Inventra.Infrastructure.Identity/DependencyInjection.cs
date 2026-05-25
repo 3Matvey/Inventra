@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Inventra.Infrastructure.Identity;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
             services.AddHttpContextAccessor();
             services.AddIdentityDatabase(configuration);
             services.AddIdentityCore();
+            services.AddMail(configuration);
             services.AddExternalAuthentication(configuration);
             services.AddIdentityPorts();
 
@@ -43,7 +45,7 @@ public static class DependencyInjection
                 .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
-                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedEmail = true;
                 })
                 .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
                 .AddDefaultTokenProviders();
@@ -82,7 +84,17 @@ public static class DependencyInjection
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IAuthenticationSession, AuthenticationSession>();
             services.AddScoped<IExternalIdentityService, ExternalIdentityService>();
+            services.AddScoped<IExternalAuthenticationSchemeService, ExternalAuthenticationSchemeService>();
+            services.AddScoped<IPasswordIdentityService, PasswordIdentityService>();
             services.AddScoped<IIdentityAccountService, IdentityAccountService>();
+
+            return services;
+        }
+
+        private IServiceCollection AddMail(IConfiguration configuration)
+        {
+            services.Configure<MailOptions>(configuration.GetSection(MailOptions.SectionName));
+            services.AddScoped<SmtpEmailSender>();
 
             return services;
         }
@@ -170,4 +182,5 @@ public static class DependencyInjection
             $"External auth provider '{section.Path}' is partially configured. " +
             $"Required keys: {expectedKeys}.");
     }
+
 }
