@@ -1,10 +1,15 @@
 using Inventra.Application.Common.Queries.Dto;
 using Inventra.Application.Inventories.Queries.Dto;
+using System.Text.RegularExpressions;
 
 namespace Inventra.Infrastructure.Data.Queries;
 
 internal partial class InventoryQueries
 {
+    private static readonly Regex SearchTokenRegex = new(
+        @"[\p{L}\p{N}]+",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     public async Task<PagedResult<InventoryTableRowDto>> GetLatestAsync(
         PageRequest page,
         CancellationToken cancellationToken = default)
@@ -128,33 +133,43 @@ internal partial class InventoryQueries
         IQueryable<InventoryRowBase> rows,
         string term)
     {
-        if (string.IsNullOrWhiteSpace(term))
-            return rows;
+        var tsQuery = BuildPrefixTsQuery(term);
 
-        var normalizedTerm = term.Trim();
+        if (tsQuery is null)
+            return rows;
 
         return rows.Where(x =>
             EF.Functions.ToTsVector(
                 "simple",
                 x.Title + " " + (x.DescriptionMarkdown ?? string.Empty))
-            .Matches(EF.Functions.PlainToTsQuery("simple", normalizedTerm)));
+            .Matches(EF.Functions.ToTsQuery("simple", tsQuery)));
     }
 
     private static IQueryable<InventoryRowBase> ApplySearchSorting(
         IQueryable<InventoryRowBase> rows,
         string term)
     {
-        if (string.IsNullOrWhiteSpace(term))
-            return rows.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt);
+        var tsQuery = BuildPrefixTsQuery(term);
 
-        var normalizedTerm = term.Trim();
+        if (tsQuery is null)
+            return rows.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt);
 
         return rows
             .OrderByDescending(x => EF.Functions.ToTsVector(
                     "simple",
                     x.Title + " " + (x.DescriptionMarkdown ?? string.Empty))
-                .Rank(EF.Functions.PlainToTsQuery("simple", normalizedTerm)))
+                .Rank(EF.Functions.ToTsQuery("simple", tsQuery)))
             .ThenByDescending(x => x.UpdatedAt ?? x.CreatedAt);
+    }
+
+    private static string? BuildPrefixTsQuery(string term)
+    {
+        var tokens = SearchTokenRegex
+            .Matches(term)
+            .Select(match => $"{match.Value}:*")
+            .ToArray();
+
+        return tokens.Length == 0 ? null : string.Join(" & ", tokens);
     }
 
     private static IQueryable<InventoryRowBase> ApplyCategoryFilter(
