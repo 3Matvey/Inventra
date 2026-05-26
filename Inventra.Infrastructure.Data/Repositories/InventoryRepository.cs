@@ -12,6 +12,7 @@ internal class InventoryRepository(AppDbContext dbContext) : IInventoryRepositor
             .Include(x => x.IdFormatElements)
             .Include(x => x.Tags)
             .Include(x => x.Comments)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 

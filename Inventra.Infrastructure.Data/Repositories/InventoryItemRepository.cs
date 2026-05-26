@@ -9,6 +9,7 @@ internal class InventoryItemRepository(AppDbContext dbContext) : IInventoryItemR
         return dbContext.InventoryItems
             .Include(x => x.FieldValues)
             .Include(x => x.Likes)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
