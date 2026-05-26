@@ -37,11 +37,6 @@ public static class InventoryErrors
             "Inventory.InvalidFieldOrder",
             "Field order must contain every field exactly once.");
 
-    public static Error FieldLimitExceeded(string description) =>
-        Error.BadRequest(
-            "Inventory.FieldLimitExceeded",
-            description);
-
     public static Error AccessUserNotFound(string userNameOrEmail) =>
         Error.NotFound(
             "Inventory.AccessUserNotFound",

@@ -6,7 +6,6 @@ namespace Inventra.Domain.Entities;
 
 public sealed class Inventory : AuditableEntity
 {
-    public const int MaxFieldsPerType = 3;
     public const int RecommendedMaxIdElements = 10;
 
     private readonly List<InventoryField> _fields = [];
@@ -110,8 +109,6 @@ public sealed class Inventory : AuditableEntity
         string? description,
         bool showInTable)
     {
-        EnsureFieldLimit(type);
-
         var field = new InventoryField(
             Id,
             type,
@@ -249,14 +246,6 @@ public sealed class Inventory : AuditableEntity
         if (incrementVersion)
         {
             MarkChanged();
-        }
-    }
-
-    private void EnsureFieldLimit(InventoryFieldType type)
-    {
-        if (_fields.Count(x => x.Type == type) >= MaxFieldsPerType)
-        {
-            throw new InventoryFieldLimitExceededException(type, MaxFieldsPerType);
         }
     }
 

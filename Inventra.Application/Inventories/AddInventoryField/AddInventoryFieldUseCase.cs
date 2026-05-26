@@ -1,5 +1,3 @@
-using Inventra.Domain.Exceptions;
-
 namespace Inventra.Application.Inventories.AddInventoryField;
 
 public sealed class AddInventoryFieldUseCase(
@@ -27,21 +25,14 @@ public sealed class AddInventoryFieldUseCase(
         Inventory inventory,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var field = inventory.AddField(
+        var field = inventory.AddField(
                 request.Type,
                 request.Title,
                 request.Description,
                 request.ShowInTable);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return field.Id;
-        }
-        catch (InventoryFieldLimitExceededException exception)
-        {
-            return InventoryErrors.FieldLimitExceeded(exception.Message);
-        }
+        return field.Id;
     }
 }
