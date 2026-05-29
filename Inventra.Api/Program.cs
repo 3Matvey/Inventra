@@ -7,6 +7,7 @@ using Inventra.Infrastructure.Identity;
 using Inventra.Infrastructure.Cloudinary;
 using Inventra.Infrastructure.Caching;
 using Inventra.Infrastructure.Export;
+using Inventra.Infrastructure.Dropbox;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ builder.Services.AddApplicationServices()
     .AddIdentityServices(configuration)
     .AddCachingServices(configuration)
     .AddExportServices()
+    .AddDropboxServices(configuration)
     .AddCloudinaryServices(configuration);
 
 builder.Services.AddOpenApi();

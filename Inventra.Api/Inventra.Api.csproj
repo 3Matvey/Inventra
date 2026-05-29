@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Inventra.Infrastructure.Caching\Inventra.Infrastructure.Caching.csproj" />
     <ProjectReference Include="..\Inventra.Infrastructure.Cloudinary\Inventra.Infrastructure.Cloudinary.csproj" />
     <ProjectReference Include="..\Inventra.Infrastructure.Data\Inventra.Infrastructure.Data.csproj" />
+    <ProjectReference Include="..\Inventra.Infrastructure.Dropbox\Inventra.Infrastructure.Dropbox.csproj" />
     <ProjectReference Include="..\Inventra.Infrastructure.Export\Inventra.Infrastructure.Export.csproj" />
     <ProjectReference Include="..\Inventra.Infrastructure.Identity\Inventra.Infrastructure.Identity.csproj" />
   </ItemGroup>
