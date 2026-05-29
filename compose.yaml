@@ -26,8 +26,11 @@ services:
       Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET:?CLOUDINARY_API_SECRET is required}
       Cloudinary__UploadFolder: ${CLOUDINARY_UPLOAD_FOLDER:-inventra}
       Cloudinary__MaxImageSizeBytes: ${CLOUDINARY_MAX_IMAGE_SIZE_BYTES:-5242880}
-      Dropbox__AccessToken: ${DROPBOX_ACCESS_TOKEN:?DROPBOX_ACCESS_TOKEN is required}
+      Dropbox__AppKey: ${DROPBOX_APP_KEY:?DROPBOX_APP_KEY is required}
+      Dropbox__AppSecret: ${DROPBOX_APP_SECRET:?DROPBOX_APP_SECRET is required}
+      Dropbox__RefreshToken: ${DROPBOX_REFRESH_TOKEN:?DROPBOX_REFRESH_TOKEN is required}
       Dropbox__SupportTicketsFolder: ${DROPBOX_SUPPORT_TICKETS_FOLDER:-/InventraSupportTickets}
+      Dropbox__TokenUrl: ${DROPBOX_TOKEN_URL:-https://api.dropboxapi.com/oauth2/token}
       Dropbox__UploadUrl: ${DROPBOX_UPLOAD_URL:-https://content.dropboxapi.com/2/files/upload}
       Dropbox__CreateFolderUrl: ${DROPBOX_CREATE_FOLDER_URL:-https://api.dropboxapi.com/2/files/create_folder_v2}
     ports:
